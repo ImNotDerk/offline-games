@@ -1,12 +1,13 @@
 /**
  * Snake Retro Deluxe
+ * Optimized for instant restarts, smooth controls, and high-score saves.
  */
 class SnakeGame {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
     this.canvas = null;
     this.ctx = null;
-    this.gridSize = 20; // 20x20 cells
+    this.gridSize = 20;
     this.tileSize = 20;
     this.snake = [];
     this.direction = { x: 1, y: 0 };
@@ -18,7 +19,7 @@ class SnakeGame {
     this.bestScore = window.offlineStorage.getHighScore('snake');
     this.particles = [];
     this.gameLoop = null;
-    this.speed = 120; // ms per tick
+    this.speed = 110;
     this.isPaused = false;
     this.isGameOver = false;
   }
@@ -37,15 +38,15 @@ class SnakeGame {
         </div>
       </div>
       <div class="game-controls-bar">
-        <button class="btn btn-primary" id="snake-restart">New Game</button>
-        <button class="btn btn-secondary" id="snake-pause">Pause</button>
+        <button class="btn btn-primary" id="snake-restart">New Game (R)</button>
+        <button class="btn btn-secondary" id="snake-pause">Pause (P)</button>
         <select id="snake-speed-select" class="form-select">
           <option value="140">Speed: Chill</option>
           <option value="110" selected>Speed: Classic</option>
-          <option value="80">Speed: Turbo</option>
+          <option value="75">Speed: Turbo</option>
         </select>
       </div>
-      <div class="canvas-wrapper">
+      <div class="canvas-wrapper" id="snake-canvas-wrapper" style="position: relative;">
         <canvas id="snake-canvas" width="440" height="440"></canvas>
       </div>
       <div class="virtual-dpad" id="snake-dpad">
@@ -57,7 +58,7 @@ class SnakeGame {
         </div>
       </div>
       <div class="game-instructions">
-        <p><strong>Controls:</strong> <strong>Arrow Keys</strong> or <strong>WASD</strong>. Press <strong>Space</strong> or <strong>P</strong> to pause.</p>
+        <p><strong>Controls:</strong> <strong>Arrow Keys</strong> or <strong>WASD</strong>. Press <strong>Space</strong> or <strong>P</strong> to pause. Press <strong>R</strong> or <strong>Space</strong> when game over to restart instantly.</p>
       </div>
     `;
 
@@ -103,23 +104,32 @@ class SnakeGame {
     this.spawnFood();
     this.updateStats();
 
+    // Remove any game-over overlay if present
+    const wrapper = document.getElementById('snake-canvas-wrapper');
+    const existingOverlay = wrapper ? wrapper.querySelector('.game-overlay') : null;
+    if (existingOverlay) existingOverlay.remove();
+
     const pauseBtn = document.getElementById('snake-pause');
-    if (pauseBtn) pauseBtn.textContent = 'Pause';
+    if (pauseBtn) pauseBtn.textContent = 'Pause (P)';
 
     this.gameLoop = setInterval(() => this.tick(), this.speed);
+    window.soundEngine.click();
     this.render();
   }
 
   togglePause() {
-    if (this.isGameOver) return;
+    if (this.isGameOver) {
+      this.restart();
+      return;
+    }
     this.isPaused = !this.isPaused;
     const pauseBtn = document.getElementById('snake-pause');
     if (this.isPaused) {
       clearInterval(this.gameLoop);
-      if (pauseBtn) pauseBtn.textContent = 'Resume';
+      if (pauseBtn) pauseBtn.textContent = 'Resume (P)';
       this.render();
     } else {
-      if (pauseBtn) pauseBtn.textContent = 'Pause';
+      if (pauseBtn) pauseBtn.textContent = 'Pause (P)';
       this.gameLoop = setInterval(() => this.tick(), this.speed);
     }
   }
@@ -134,7 +144,6 @@ class SnakeGame {
       valid = !this.snake.some(segment => segment.x === this.food.x && segment.y === this.food.y);
     }
 
-    // 25% chance of spawning bonus gold orb if none exists
     if (!this.bonusFood && Math.random() < 0.25) {
       let bValid = false;
       let bPos;
@@ -147,11 +156,12 @@ class SnakeGame {
                  (bPos.x !== this.food.x || bPos.y !== this.food.y);
       }
       this.bonusFood = bPos;
-      this.bonusTimer = 35; // ticks before despawning
+      this.bonusTimer = 35;
     }
   }
 
   handleDirectionChange(dir) {
+    if (this.isGameOver) return;
     if (dir === 'up' && this.direction.y === 0) this.nextDirection = { x: 0, y: -1 };
     else if (dir === 'down' && this.direction.y === 0) this.nextDirection = { x: 0, y: 1 };
     else if (dir === 'left' && this.direction.x === 0) this.nextDirection = { x: -1, y: 0 };
@@ -160,16 +170,30 @@ class SnakeGame {
 
   setupKeys() {
     this.keyHandler = (e) => {
+      if (this.isGameOver) {
+        if (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          this.restart();
+          return;
+        }
+      }
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', ' '].includes(e.key)) {
         e.preventDefault();
       }
+
       if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') this.handleDirectionChange('up');
       else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') this.handleDirectionChange('down');
       else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') this.handleDirectionChange('left');
       else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') this.handleDirectionChange('right');
+      else if (e.key.toLowerCase() === 'r') this.restart();
       else if (e.key === ' ' || e.key.toLowerCase() === 'p') this.togglePause();
     };
     window.addEventListener('keydown', this.keyHandler);
+
+    this.canvas.onclick = () => {
+      if (this.isGameOver) this.restart();
+    };
   }
 
   tick() {
@@ -179,13 +203,11 @@ class SnakeGame {
       y: this.snake[0].y + this.direction.y
     };
 
-    // Wall collision
     if (head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridSize) {
       this.endGame();
       return;
     }
 
-    // Self collision
     if (this.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
       this.endGame();
       return;
@@ -193,7 +215,6 @@ class SnakeGame {
 
     this.snake.unshift(head);
 
-    // Food check
     if (head.x === this.food.x && head.y === this.food.y) {
       this.score += 10;
       this.createParticles(head.x * this.tileSize + this.tileSize/2, head.y * this.tileSize + this.tileSize/2, '#10b981');
@@ -249,13 +270,35 @@ class SnakeGame {
     clearInterval(this.gameLoop);
     window.soundEngine.gameOver();
     this.render();
+    this.showGameOverOverlay();
+  }
+
+  showGameOverOverlay() {
+    const wrapper = document.getElementById('snake-canvas-wrapper');
+    if (!wrapper) return;
+    const existing = wrapper.querySelector('.game-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'game-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-card">
+        <h3>Game Over! 💀</h3>
+        <p>Final Score: <strong>${this.score}</strong> | Length: <strong>${this.snake.length}</strong></p>
+        <button class="btn btn-primary" id="snake-overlay-restart">Play Again (Space / Enter)</button>
+      </div>
+    `;
+    wrapper.appendChild(overlay);
+    overlay.querySelector('#snake-overlay-restart').onclick = (e) => {
+      e.stopPropagation();
+      this.restart();
+    };
   }
 
   render() {
     const { ctx, canvas, tileSize } = this;
     if (!ctx) return;
 
-    // Dark cyber grid background
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -284,7 +327,7 @@ class SnakeGame {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Render Bonus Food if active
+    // Render Bonus Food
     if (this.bonusFood) {
       const bx = this.bonusFood.x * tileSize + tileSize / 2;
       const by = this.bonusFood.y * tileSize + tileSize / 2;
@@ -338,7 +381,6 @@ class SnakeGame {
       ctx.globalAlpha = 1.0;
     }
 
-    // Overlays
     if (this.isPaused) {
       ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -346,19 +388,6 @@ class SnakeGame {
       ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
-    } else if (this.isGameOver) {
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(`Final Score: ${this.score}`, canvas.width / 2, canvas.height / 2 + 15);
-      ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillText('Click New Game or Space to Restart', canvas.width / 2, canvas.height / 2 + 45);
     }
   }
 

@@ -1,5 +1,6 @@
 /**
  * Cosmic Voyage: Star Defender (Action & Arcade)
+ * Optimized for instant restarts, smooth star parallax, and power-up progression.
  */
 class SpaceRunnerGame {
   constructor(containerId) {
@@ -7,7 +8,7 @@ class SpaceRunnerGame {
     this.canvas = null;
     this.ctx = null;
     this.player = {
-      x: 200,
+      x: 184,
       y: 420,
       width: 32,
       height: 36,
@@ -48,15 +49,15 @@ class SpaceRunnerGame {
         </div>
       </div>
       <div class="game-controls-bar">
-        <button class="btn btn-primary" id="sr-restart">New Mission</button>
-        <button class="btn btn-secondary" id="sr-pause">Pause</button>
+        <button class="btn btn-primary" id="sr-restart">New Mission (R)</button>
+        <button class="btn btn-secondary" id="sr-pause">Pause (P)</button>
         <button class="btn btn-outline" id="sr-autofire">⚡ Auto-Fire: ON</button>
       </div>
-      <div class="canvas-wrapper">
+      <div class="canvas-wrapper" id="sr-canvas-wrapper" style="position: relative;">
         <canvas id="sr-canvas" width="400" height="500"></canvas>
       </div>
       <div class="game-instructions">
-        <p><strong>Controls:</strong> <strong>Arrow Keys</strong> or <strong>WASD</strong> to pilot ship. <strong>Space</strong> to manual fire. Move with mouse or touch drag also supported!</p>
+        <p><strong>Controls:</strong> <strong>Arrow Keys</strong> or <strong>WASD</strong> to pilot ship. <strong>Space</strong> to manual fire. Mouse / Touch drag supported. Press <strong>R</strong> or <strong>Space</strong> to restart on game over.</p>
       </div>
     `;
 
@@ -98,7 +99,7 @@ class SpaceRunnerGame {
       y: 420,
       width: 32,
       height: 36,
-      speed: 5.5,
+      speed: 6,
       shield: 100,
       maxShield: 100,
       blasterLevel: 1
@@ -115,33 +116,48 @@ class SpaceRunnerGame {
     this.isGameOver = false;
     this.updateStats();
 
-    const pBtn = document.getElementById('sr-pause');
-    if (pBtn) pBtn.textContent = 'Pause';
+    const wrapper = document.getElementById('sr-canvas-wrapper');
+    const existingOverlay = wrapper ? wrapper.querySelector('.game-overlay') : null;
+    if (existingOverlay) existingOverlay.remove();
 
-    this.lastTime = performance.now();
+    const pBtn = document.getElementById('sr-pause');
+    if (pBtn) pBtn.textContent = 'Pause (P)';
+
     this.loop();
+    window.soundEngine.click();
   }
 
   togglePause() {
-    if (this.isGameOver) return;
+    if (this.isGameOver) {
+      this.restart();
+      return;
+    }
     this.isPaused = !this.isPaused;
     const pBtn = document.getElementById('sr-pause');
     if (this.isPaused) {
-      if (pBtn) pBtn.textContent = 'Resume';
+      if (pBtn) pBtn.textContent = 'Resume (P)';
     } else {
-      if (pBtn) pBtn.textContent = 'Pause';
-      this.lastTime = performance.now();
+      if (pBtn) pBtn.textContent = 'Pause (P)';
       this.loop();
     }
   }
 
   setupListeners() {
     this.kd = (e) => {
+      if (this.isGameOver) {
+        if (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          this.restart();
+          return;
+        }
+      }
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', ' '].includes(e.key)) {
         e.preventDefault();
       }
       this.keys[e.key.toLowerCase()] = true;
-      if (e.key === 'p' || e.key === 'P') this.togglePause();
+      if (e.key.toLowerCase() === 'p') this.togglePause();
+      else if (e.key.toLowerCase() === 'r') this.restart();
     };
     this.ku = (e) => {
       this.keys[e.key.toLowerCase()] = false;
@@ -149,13 +165,26 @@ class SpaceRunnerGame {
     window.addEventListener('keydown', this.kd);
     window.addEventListener('keyup', this.ku);
 
-    // Mouse / Touch tracking
     let dragging = false;
-    this.canvas.onmousedown = (e) => { dragging = true; this.trackPointer(e); };
+    this.canvas.onmousedown = (e) => {
+      if (this.isGameOver) {
+        this.restart();
+        return;
+      }
+      dragging = true;
+      this.trackPointer(e);
+    };
     window.onmousemove = (e) => { if (dragging) this.trackPointer(e); };
     window.onmouseup = () => { dragging = false; };
 
-    this.canvas.ontouchstart = (e) => { dragging = true; this.trackPointer(e.touches[0]); };
+    this.canvas.ontouchstart = (e) => {
+      if (this.isGameOver) {
+        this.restart();
+        return;
+      }
+      dragging = true;
+      this.trackPointer(e.touches[0]);
+    };
     this.canvas.ontouchmove = (e) => { if (dragging) this.trackPointer(e.touches[0]); };
     this.canvas.ontouchend = () => { dragging = false; };
   }
@@ -202,7 +231,6 @@ class SpaceRunnerGame {
   }
 
   update() {
-    // Player controls
     if (this.keys['arrowleft'] || this.keys['a']) this.player.x -= this.player.speed;
     if (this.keys['arrowright'] || this.keys['d']) this.player.x += this.player.speed;
     if (this.keys['arrowup'] || this.keys['w']) this.player.y -= this.player.speed;
@@ -211,14 +239,12 @@ class SpaceRunnerGame {
     this.player.x = Math.max(0, Math.min(this.canvas.width - this.player.width, this.player.x));
     this.player.y = Math.max(50, Math.min(this.canvas.height - this.player.height, this.player.y));
 
-    // Firing
     this.fireTimer++;
-    if ((this.autoFire || this.keys[' ']) && this.fireTimer > 12) {
+    if ((this.autoFire || this.keys[' ']) && this.fireTimer > 11) {
       this.fireLaser();
       this.fireTimer = 0;
     }
 
-    // Stars scrolling
     this.stars.forEach(st => {
       st.y += st.speed;
       if (st.y > this.canvas.height) {
@@ -227,7 +253,6 @@ class SpaceRunnerGame {
       }
     });
 
-    // Lasers
     for (let i = this.lasers.length - 1; i >= 0; i--) {
       const l = this.lasers[i];
       l.x += l.vx;
@@ -235,20 +260,17 @@ class SpaceRunnerGame {
       if (l.y < -10) this.lasers.splice(i, 1);
     }
 
-    // Spawn enemies
     this.spawnTimer++;
-    const spawnRate = Math.max(25, 60 - this.wave * 5);
+    const spawnRate = Math.max(22, 60 - this.wave * 5);
     if (this.spawnTimer > spawnRate) {
       this.spawnEnemy();
       this.spawnTimer = 0;
     }
 
-    // Enemies movement & collision
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const en = this.enemies[i];
       en.y += en.speed;
 
-      // Check collision with player
       const dx = en.x - (this.player.x + this.player.width / 2);
       const dy = en.y - (this.player.y + this.player.height / 2);
       const dist = Math.hypot(dx, dy);
@@ -265,7 +287,6 @@ class SpaceRunnerGame {
         continue;
       }
 
-      // Check laser hits
       for (let j = this.lasers.length - 1; j >= 0; j--) {
         const l = this.lasers[j];
         if (Math.hypot(en.x - l.x, en.y - l.y) < en.r + 5) {
@@ -278,8 +299,7 @@ class SpaceRunnerGame {
             this.createExplosion(en.x, en.y, en.color, 18);
             window.soundEngine.explosion();
 
-            // Chance to drop powerup
-            if (Math.random() < 0.2) {
+            if (Math.random() < 0.22) {
               this.powerups.push({
                 x: en.x,
                 y: en.y,
@@ -304,7 +324,6 @@ class SpaceRunnerGame {
       }
     }
 
-    // Powerups
     for (let i = this.powerups.length - 1; i >= 0; i--) {
       const p = this.powerups[i];
       p.y += p.vy;
@@ -324,7 +343,6 @@ class SpaceRunnerGame {
       if (p.y > this.canvas.height + 20) this.powerups.splice(i, 1);
     }
 
-    // Particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const pt = this.particles[i];
       pt.x += pt.vx;
@@ -381,32 +399,51 @@ class SpaceRunnerGame {
     this.isGameOver = true;
     window.soundEngine.gameOver();
     this.updateStats();
+    this.render();
+    this.showGameOverOverlay();
+  }
+
+  showGameOverOverlay() {
+    const wrapper = document.getElementById('sr-canvas-wrapper');
+    if (!wrapper) return;
+    const existing = wrapper.querySelector('.game-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'game-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-card">
+        <h3>Hull Breached! 💥</h3>
+        <p>Final Score: <strong>${this.score}</strong> | Wave: <strong>${this.wave}</strong></p>
+        <button class="btn btn-primary" id="sr-overlay-restart">Launch Again (Space / Enter)</button>
+      </div>
+    `;
+    wrapper.appendChild(overlay);
+    overlay.querySelector('#sr-overlay-restart').onclick = (e) => {
+      e.stopPropagation();
+      this.restart();
+    };
   }
 
   loop() {
-    if (this.isPaused) return;
+    if (this.isPaused || this.isGameOver) return;
     this.update();
     this.render();
-    if (!this.isGameOver) {
-      this.animId = requestAnimationFrame(() => this.loop());
-    }
+    this.animId = requestAnimationFrame(() => this.loop());
   }
 
   render() {
     const { ctx, canvas } = this;
     if (!ctx) return;
 
-    // Deep space gradient
     ctx.fillStyle = '#090d16';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Stars
     this.stars.forEach(st => {
       ctx.fillStyle = st.color;
       ctx.fillRect(st.x, st.y, st.size, st.size);
     });
 
-    // Powerups
     this.powerups.forEach(p => {
       ctx.beginPath();
       ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
@@ -422,7 +459,6 @@ class SpaceRunnerGame {
       ctx.fillText(p.type === 'shield' ? 'S' : 'B', p.x, p.y);
     });
 
-    // Enemies
     this.enemies.forEach(en => {
       ctx.fillStyle = en.color;
       ctx.shadowColor = en.color;
@@ -432,7 +468,6 @@ class SpaceRunnerGame {
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Health ring
       if (en.maxHp > 1) {
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
@@ -442,7 +477,6 @@ class SpaceRunnerGame {
       }
     });
 
-    // Lasers
     this.lasers.forEach(l => {
       ctx.fillStyle = l.color;
       ctx.shadowColor = l.color;
@@ -451,7 +485,6 @@ class SpaceRunnerGame {
       ctx.shadowBlur = 0;
     });
 
-    // Particles
     this.particles.forEach(pt => {
       ctx.fillStyle = pt.color;
       ctx.globalAlpha = Math.max(0, pt.life);
@@ -459,14 +492,12 @@ class SpaceRunnerGame {
       ctx.globalAlpha = 1.0;
     });
 
-    // Player ship
     if (!this.isGameOver) {
       const px = this.player.x;
       const py = this.player.y;
       const pw = this.player.width;
       const ph = this.player.height;
 
-      // Engine thruster flame
       ctx.fillStyle = Math.random() > 0.5 ? '#f97316' : '#facc15';
       ctx.beginPath();
       ctx.moveTo(px + pw / 2 - 5, py + ph);
@@ -475,7 +506,6 @@ class SpaceRunnerGame {
       ctx.closePath();
       ctx.fill();
 
-      // Ship body
       ctx.fillStyle = '#38bdf8';
       ctx.beginPath();
       ctx.moveTo(px + pw / 2, py);
@@ -485,13 +515,11 @@ class SpaceRunnerGame {
       ctx.closePath();
       ctx.fill();
 
-      // Cockpit
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(px + pw / 2, py + 14, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Shield aura if active
       if (this.player.shield > 25) {
         ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
         ctx.lineWidth = 2;
@@ -501,7 +529,6 @@ class SpaceRunnerGame {
       }
     }
 
-    // Overlays
     if (this.isPaused) {
       ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -509,19 +536,6 @@ class SpaceRunnerGame {
       ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('MISSION PAUSED', canvas.width / 2, canvas.height / 2);
-    } else if (this.isGameOver) {
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('HULL BREACH - GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(`Final Score: ${this.score} | Wave: ${this.wave}`, canvas.width / 2, canvas.height / 2 + 15);
-      ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillText('Click New Mission to launch again', canvas.width / 2, canvas.height / 2 + 45);
     }
   }
 

@@ -43,11 +43,11 @@ class MinesweeperGame {
         <button class="btn btn-secondary" id="ms-face-btn">🙂 New</button>
         <button class="btn btn-outline" id="ms-flag-mode-btn">🚩 Flag Mode: OFF</button>
       </div>
-      <div class="ms-board-wrapper">
+      <div class="ms-board-wrapper" id="ms-board-wrapper" style="position: relative;">
         <div id="ms-grid" class="ms-grid" role="grid" aria-label="Minesweeper Grid"></div>
       </div>
       <div class="game-instructions">
-        <p><strong>Controls:</strong> Left Click to reveal, Right Click (or toggle Flag Mode) to place flags. Click numbered cells to chord-reveal when flags match.</p>
+        <p><strong>Controls:</strong> Left Click to reveal, Right Click (or toggle Flag Mode) to place flags. Click numbered cells to chord-reveal. Press <strong>R</strong> to restart anytime.</p>
       </div>
     `;
 
@@ -65,7 +65,25 @@ class MinesweeperGame {
       flagBtn.classList.toggle('active', this.flagMode);
     };
 
+    this.setupKeys();
     this.restart();
+  }
+
+  setupKeys() {
+    this.keyHandler = (e) => {
+      if (this.gameOver || this.won) {
+        if (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          this.restart();
+          return;
+        }
+      }
+      if (e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        this.restart();
+      }
+    };
+    window.addEventListener('keydown', this.keyHandler);
   }
 
   restart() {
@@ -78,6 +96,10 @@ class MinesweeperGame {
     this.gameOver = false;
     this.won = false;
     this.timer = 0;
+
+    const wrapper = document.getElementById('ms-board-wrapper');
+    const existing = wrapper ? wrapper.querySelector('.game-overlay') : null;
+    if (existing) existing.remove();
 
     const timerEl = document.getElementById('ms-timer');
     const minesEl = document.getElementById('ms-mines');
@@ -269,6 +291,7 @@ class MinesweeperGame {
     }
     hitCell.exploded = true;
     this.render();
+    this.showOverlay('Detonated! 💥', `Time: ${this.timer}s`, 'Play Again');
   }
 
   checkWin() {
@@ -286,7 +309,27 @@ class MinesweeperGame {
       window.soundEngine.victory();
       const faceBtn = document.getElementById('ms-face-btn');
       if (faceBtn) faceBtn.textContent = '😎 Won!';
+      this.showOverlay('Field Cleared! 🎉', `Completed in ${this.timer} seconds!`, 'New Game');
     }
+  }
+
+  showOverlay(title, subtitle, btnText) {
+    const wrapper = document.getElementById('ms-board-wrapper');
+    if (!wrapper) return;
+    const existing = wrapper.querySelector('.game-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'game-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-card">
+        <h3>${title}</h3>
+        <p>${subtitle}</p>
+        <button class="btn btn-primary" id="ms-overlay-btn">${btnText} (Enter / Space)</button>
+      </div>
+    `;
+    wrapper.appendChild(overlay);
+    overlay.querySelector('#ms-overlay-btn').onclick = () => this.restart();
   }
 
   render() {
@@ -330,6 +373,7 @@ class MinesweeperGame {
 
   destroy() {
     if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.keyHandler) window.removeEventListener('keydown', this.keyHandler);
   }
 }
 

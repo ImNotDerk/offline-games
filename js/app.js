@@ -4,6 +4,33 @@
 
 const GAMES_CATALOG = [
   {
+    id: 'sudoku',
+    title: 'Sudoku Deluxe',
+    icon: '🔢',
+    category: 'puzzle',
+    tag: 'Brain',
+    desc: 'Solve infinite unique 9×9 puzzles with Notes mode, difficulty levels, and smart hints.',
+    className: 'SudokuGame'
+  },
+  {
+    id: 'wordle',
+    title: 'Wordle Offline',
+    icon: '🟩',
+    category: 'puzzle',
+    tag: 'Word Game',
+    desc: 'Guess the hidden 5-letter word in 6 tries using color clues and an offline dictionary.',
+    className: 'WordleGame'
+  },
+  {
+    id: 'solitaire',
+    title: 'Klondike Solitaire',
+    icon: '♠️',
+    category: 'puzzle',
+    tag: 'Classic Card',
+    desc: 'The legendary offline card game with smart click auto-move and foundation auto-complete.',
+    className: 'SolitaireGame'
+  },
+  {
     id: 'tetris',
     title: 'Tetra Blocks',
     icon: '🧱',
@@ -15,20 +42,11 @@ const GAMES_CATALOG = [
   {
     id: 'game2048',
     title: '2048 Deluxe',
-    icon: '🔢',
+    icon: '🎴',
     category: 'puzzle',
     tag: 'Brain',
     desc: 'Slide matching number tiles together, merge them, and reach the elusive 2048 tile.',
     className: 'Game2048'
-  },
-  {
-    id: 'snake',
-    title: 'Snake Retro Deluxe',
-    icon: '🐍',
-    category: 'arcade',
-    tag: 'Arcade',
-    desc: 'Cyber serpent collecting energy orbs with glowing neon visuals and speed scaling.',
-    className: 'SnakeGame'
   },
   {
     id: 'minesweeper',
@@ -40,6 +58,15 @@ const GAMES_CATALOG = [
     className: 'MinesweeperGame'
   },
   {
+    id: 'snake',
+    title: 'Snake Retro Deluxe',
+    icon: '🐍',
+    category: 'arcade',
+    tag: 'Arcade',
+    desc: 'Cyber serpent collecting energy orbs with glowing neon visuals and speed scaling.',
+    className: 'SnakeGame'
+  },
+  {
     id: 'spaceRunner',
     title: 'Cosmic Voyage',
     icon: '🚀',
@@ -47,24 +74,6 @@ const GAMES_CATALOG = [
     tag: 'Shooter',
     desc: 'Deep space action shooter: dodge asteroids, blast drone swarms, and upgrade blasters.',
     className: 'SpaceRunnerGame'
-  },
-  {
-    id: 'dungeon',
-    title: 'Shadow Crypt',
-    icon: '⚔️',
-    category: 'strategy',
-    tag: 'Roguelike',
-    desc: 'Turn-based tactical dungeon crawler with fog of war, loot, levels, and a crypt boss.',
-    className: 'DungeonRoguelikeGame'
-  },
-  {
-    id: 'connectFour',
-    title: 'Tactics 4',
-    icon: '🔴',
-    category: 'strategy',
-    tag: 'Strategy',
-    desc: 'Connect four discs in a row against an intelligent Minimax AI or local 2-player.',
-    className: 'ConnectFourGame'
   },
   {
     id: 'ambientSound',

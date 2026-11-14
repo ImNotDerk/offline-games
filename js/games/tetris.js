@@ -1,5 +1,6 @@
 /**
  * Tetra Blocks (Tetris style)
+ * Optimized for instant restarts, smooth ghost piece, and high-score saves.
  */
 class TetrisGame {
   constructor(containerId) {
@@ -45,8 +46,8 @@ class TetrisGame {
         </div>
       </div>
       <div class="game-controls-bar">
-        <button class="btn btn-primary" id="tetris-restart">New Game</button>
-        <button class="btn btn-secondary" id="tetris-pause">Pause</button>
+        <button class="btn btn-primary" id="tetris-restart">New Game (R)</button>
+        <button class="btn btn-secondary" id="tetris-pause">Pause (P)</button>
       </div>
       <div class="tetris-layout">
         <div class="tetris-side-col">
@@ -55,7 +56,7 @@ class TetrisGame {
             <canvas id="tetris-hold-canvas" width="80" height="80"></canvas>
           </div>
         </div>
-        <div class="canvas-wrapper">
+        <div class="canvas-wrapper" id="tetris-canvas-wrapper" style="position: relative;">
           <canvas id="tetris-canvas" width="260" height="520"></canvas>
         </div>
         <div class="tetris-side-col">
@@ -66,7 +67,7 @@ class TetrisGame {
         </div>
       </div>
       <div class="game-instructions">
-        <p><strong>Controls:</strong> <strong>←/→</strong>: Move, <strong>↑</strong>: Rotate, <strong>↓</strong>: Soft Drop, <strong>Space</strong>: Hard Drop, <strong>C / Shift</strong>: Hold Piece.</p>
+        <p><strong>Controls:</strong> <strong>←/→</strong>: Move, <strong>↑</strong>: Rotate, <strong>↓</strong>: Soft Drop, <strong>Space</strong>: Hard Drop, <strong>C / Shift</strong>: Hold Piece. Press <strong>R</strong> or <strong>Enter</strong> to restart on game over.</p>
       </div>
     `;
 
@@ -98,10 +99,15 @@ class TetrisGame {
     this.spawnPiece();
     this.updateStats();
 
+    const wrapper = document.getElementById('tetris-canvas-wrapper');
+    const existingOverlay = wrapper ? wrapper.querySelector('.game-overlay') : null;
+    if (existingOverlay) existingOverlay.remove();
+
     const pBtn = document.getElementById('tetris-pause');
-    if (pBtn) pBtn.textContent = 'Pause';
+    if (pBtn) pBtn.textContent = 'Pause (P)';
 
     this.startLoop();
+    window.soundEngine.click();
     this.render();
   }
 
@@ -139,6 +145,7 @@ class TetrisGame {
       this.isGameOver = true;
       clearInterval(this.gameLoop);
       window.soundEngine.gameOver();
+      this.showGameOverOverlay();
     }
   }
 
@@ -170,7 +177,6 @@ class TetrisGame {
   rotate() {
     if (this.isPaused || this.isGameOver || !this.currentPiece) return;
     const rotated = this.rotateMatrix(this.currentPiece.matrix);
-    // Wall kick attempts: 0, +1, -1, +2, -2
     const kicks = [0, 1, -1, 2, -2];
     for (let kick of kicks) {
       if (!this.checkCollision(rotated, this.currentPiece.x + kick, this.currentPiece.y)) {
@@ -274,7 +280,7 @@ class TetrisGame {
         this.grid.splice(r, 1);
         this.grid.unshift(Array(this.cols).fill(null));
         cleared++;
-        r++; // re-check same row index after shift
+        r++;
       }
     }
 
@@ -284,7 +290,7 @@ class TetrisGame {
       this.score += (points[cleared] || 100) * this.level;
       this.level = Math.floor(this.lines / 10) + 1;
       window.soundEngine.lineClear();
-      this.startLoop(); // update loop speed
+      this.startLoop();
       this.updateStats();
     }
   }
@@ -304,13 +310,16 @@ class TetrisGame {
   }
 
   togglePause() {
-    if (this.isGameOver) return;
+    if (this.isGameOver) {
+      this.restart();
+      return;
+    }
     this.isPaused = !this.isPaused;
     const pBtn = document.getElementById('tetris-pause');
     if (this.isPaused) {
-      if (pBtn) pBtn.textContent = 'Resume';
+      if (pBtn) pBtn.textContent = 'Resume (P)';
     } else {
-      if (pBtn) pBtn.textContent = 'Pause';
+      if (pBtn) pBtn.textContent = 'Pause (P)';
     }
     this.render();
   }
@@ -329,9 +338,39 @@ class TetrisGame {
     if (bEl) bEl.textContent = this.bestScore;
   }
 
+  showGameOverOverlay() {
+    const wrapper = document.getElementById('tetris-canvas-wrapper');
+    if (!wrapper) return;
+    const existing = wrapper.querySelector('.game-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'game-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-card">
+        <h3>Game Over! 💀</h3>
+        <p>Score: <strong>${this.score}</strong> | Lines: <strong>${this.lines}</strong></p>
+        <button class="btn btn-primary" id="tetris-overlay-restart">Play Again (Enter / Space)</button>
+      </div>
+    `;
+    wrapper.appendChild(overlay);
+    overlay.querySelector('#tetris-overlay-restart').onclick = (e) => {
+      e.stopPropagation();
+      this.restart();
+    };
+  }
+
   setupKeys() {
     this.keyHandler = (e) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'c', 'C', 'Shift', 'p', 'P'].includes(e.key)) {
+      if (this.isGameOver) {
+        if (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          this.restart();
+          return;
+        }
+      }
+
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'c', 'C', 'Shift', 'p', 'P', 'r', 'R'].includes(e.key)) {
         e.preventDefault();
       }
       if (e.key === 'ArrowLeft') this.moveLeft();
@@ -341,8 +380,13 @@ class TetrisGame {
       else if (e.key === ' ') this.hardDrop();
       else if (e.key === 'c' || e.key === 'C' || e.key === 'Shift') this.hold();
       else if (e.key.toLowerCase() === 'p') this.togglePause();
+      else if (e.key.toLowerCase() === 'r') this.restart();
     };
     window.addEventListener('keydown', this.keyHandler);
+
+    this.mainCanvas.onclick = () => {
+      if (this.isGameOver) this.restart();
+    };
   }
 
   renderMini(ctx, canvas, pieceType) {
@@ -372,11 +416,9 @@ class TetrisGame {
     const cellW = canvas.width / this.cols;
     const cellH = canvas.height / this.rows;
 
-    // Board background
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Grid lines
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 1;
     for (let r = 0; r <= this.rows; r++) {
@@ -392,7 +434,6 @@ class TetrisGame {
       ctx.stroke();
     }
 
-    // Settled pieces
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
         if (this.grid[r][c]) {
@@ -404,7 +445,6 @@ class TetrisGame {
       }
     }
 
-    // Ghost piece
     if (this.currentPiece && !this.isGameOver) {
       const gy = this.getGhostY();
       const m = this.currentPiece.matrix;
@@ -424,7 +464,6 @@ class TetrisGame {
         }
       }
 
-      // Active piece
       for (let r = 0; r < m.length; r++) {
         for (let c = 0; c < m[r].length; c++) {
           if (m[r][c]) {
@@ -442,11 +481,9 @@ class TetrisGame {
       }
     }
 
-    // Mini preview boards
     this.renderMini(this.holdCtx, this.holdCanvas, this.holdPiece);
     this.renderMini(this.nextCtx, this.nextCanvas, this.nextPiece ? this.nextPiece.type : null);
 
-    // Overlays
     if (this.isPaused) {
       ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -454,19 +491,6 @@ class TetrisGame {
       ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
-    } else if (this.isGameOver) {
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(`Score: ${this.score}`, canvas.width / 2, canvas.height / 2 + 15);
-      ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillText('Press New Game to restart', canvas.width / 2, canvas.height / 2 + 45);
     }
   }
 

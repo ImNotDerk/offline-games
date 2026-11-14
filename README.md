@@ -29,13 +29,14 @@ Then navigate to `http://localhost:8080`.
 
 | Title | Category | Features |
 | :--- | :--- | :--- |
-| **Tetra Blocks** | Puzzles & Casual | Classic 10x20 Tetris with ghost piece projection, piece holding (`C`), wall kicks, and combo scoring. |
-| **2048 Deluxe** | Puzzles & Casual | Smooth tile slide & merge animations, high score saving, and an **Undo** button. |
-| **Minesweeper** | Puzzles & Casual | Easy (9x9), Medium (16x16), and Hard (30x16) boards. 100% guaranteed safe first-click, chord revealing, and flag mode. |
-| **Snake Retro Deluxe** | Action & Arcade | Cyber serpent with neon grid visuals, bonus golden orbs, combo particles, and speed modes (Chill, Classic, Turbo). |
-| **Cosmic Voyage** | Action & Arcade | Deep space retro shooter: dodge asteroids, blast alien drone swarms, collect shields, and level up dual/triple blasters. |
-| **Shadow Crypt** | Strategy & RPG | Turn-based procedural roguelike with dynamic Fog of War, loot drops, combat logs, level ups, and a floor 5 boss. |
-| **Tactics 4** | Strategy | Connect Four against an intelligent Minimax AI (Casual, Tactical, Master) or 2-player local pass-and-play. |
+| **Sudoku Deluxe** | Puzzles & Casual | Generates infinite unique 9×9 boards with Notes mode, smart hints, conflict checks, and difficulty levels. |
+| **Wordle Offline** | Puzzles & Casual | Offline 5-letter word game with 6 tries, color clues (🟩 🟨 ⬛), virtual & physical keyboard, and streak tracking. |
+| **Klondike Solitaire** | Puzzles & Casual | Classic 52-card solitaire with smart click auto-move, foundation auto-send, undo, and auto-complete. |
+| **Tetra Blocks** | Puzzles & Casual | Classic 10x20 Tetris with ghost piece projection, piece holding (`C`), wall kicks, and instant restart (`Space`/`Enter`/`R`). |
+| **2048 Deluxe** | Puzzles & Casual | Smooth tile slide & merge animations, high score saving, undo button, and instant restart (`R`). |
+| **Minesweeper** | Puzzles & Casual | Easy, Medium, and Hard boards. 100% guaranteed safe first-click, chord revealing, flag mode, and quick restart (`R`). |
+| **Snake Retro Deluxe** | Action & Arcade | Cyber serpent with neon grid visuals, bonus golden orbs, combo particles, and one-tap restart (`Space`/`Enter`/`R`). |
+| **Cosmic Voyage** | Action & Arcade | Deep space retro shooter: dodge asteroids, blast alien drone swarms, collect shields, and upgrade blasters with quick restart. |
 | **Zen Soundscape** | Offline Tools | Procedural ambient audio synthesizer: Gentle Rain, Ocean Surf, White Noise, and 10Hz Alpha Focus tones. 0 MB audio downloads. |
 | **Markdown Studio** | Offline Tools | Distraction-free Markdown editor with live preview, word/character/reading stats, auto-save, and export to `.md` or `.txt`. |
 | **Retro Guide** | Emulation | In-depth guide for running OpenEmu, RetroArch, and open-source games on macOS. |

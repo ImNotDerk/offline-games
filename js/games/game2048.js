@@ -142,6 +142,20 @@ class Game2048 {
 
   setupKeyListeners() {
     this.keyHandler = (e) => {
+      if (this.gameOver) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          this.restart();
+          return;
+        }
+      }
+
+      if (e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        this.restart();
+        return;
+      }
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(e.key)) {
         e.preventDefault();
         let moved = false;
