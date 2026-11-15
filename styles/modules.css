@@ -486,79 +486,147 @@
   display: flex;
   flex-direction: column;
   min-height: 104px;
-  border-radius: 2px;
+  border-radius: 3px;
   background: var(--color-bg-hover);
-  border: 1px dashed var(--color-border);
+  border: 2px dashed var(--color-border);
   padding: 3px;
   box-sizing: border-box;
+  position: relative;
+}
+
+.sol-column.sol-empty-col {
+  border: 2px dashed var(--color-border);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.sol-column.sol-empty-col:hover {
+  border-color: var(--color-accent);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .sol-slot {
   width: 68px;
   height: 98px;
-  border-radius: 2px;
-  border: 1px dashed var(--color-border);
+  border-radius: 3px;
+  border: 2px dashed var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--color-text-muted);
   background: var(--color-bg-surface);
   position: relative;
   cursor: pointer;
   box-sizing: border-box;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.sol-slot:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sol-slot.sol-empty-slot {
+  width: 100%;
+  height: 98px;
+  border: none;
+  opacity: 0.35;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: transparent;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+
+.sol-slot.sol-empty-slot:hover,
+.sol-column.sol-empty-col:hover .sol-empty-slot {
+  opacity: 0.85;
+  color: var(--color-accent);
 }
 
 .sol-card {
   width: 68px;
   height: 98px;
-  border-radius: 2px;
-  border: 1px solid var(--color-border-strong);
+  border-radius: 3px;
+  border: 2px solid var(--color-border);
   background: var(--color-bg-surface);
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 4px 5px;
+  padding: 5px;
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 700;
   box-sizing: border-box;
   cursor: pointer;
-  transition: transform 0.1s ease, border-color 0.1s ease;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+}
+
+.sol-card:not(.face-down):hover {
+  border-color: var(--color-accent);
 }
 
 .sol-card.face-down {
   background: var(--color-bg-hover);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
     transparent 4px,
     var(--color-border) 4px,
-    var(--color-border) 6px
+    var(--color-border) 8px
   );
   cursor: default;
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
 }
 
 .sol-card.selected {
   outline: 2px solid var(--color-accent);
-  transform: translateY(-3px);
+  border-color: var(--color-accent);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 245, 212, 0.35);
+  z-index: 45;
 }
 
 .sol-card.suit-red {
-  color: #dc2626;
+  color: #ff334b;
 }
 
 .sol-card.suit-black {
   color: var(--color-text-main);
 }
 
+/* Theme-specific high-contrast retro card suit tweaks */
+[data-theme="gameboy"] .sol-card.suit-red {
+  color: #8b0000;
+}
+
+[data-theme="gameboy"] .sol-card.suit-black {
+  color: #0f380f;
+}
+
+[data-theme="amber"] .sol-card.suit-red {
+  color: #ff4d2e;
+}
+
+[data-theme="amber"] .sol-card.suit-black {
+  color: #ffb703;
+}
+
 .sol-card-top, .sol-card-bottom {
   display: flex;
   justify-content: space-between;
-  font-size: 0.78rem;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.5px;
 }
 
 .sol-card-bottom {
@@ -567,8 +635,9 @@
 
 .sol-card-center {
   align-self: center;
-  font-size: 1.15rem;
+  font-size: 1.45rem;
   line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
 }
 
 .sol-tableau-card {

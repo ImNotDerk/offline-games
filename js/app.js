@@ -3426,9 +3426,9 @@ class ModSolitaire {
 
         <div class="sol-tableau-row">
           ${this.tableau.map((col, colIdx) => `
-            <div class="sol-column" data-tableau="${colIdx}">
+            <div class="sol-column${col.length === 0 ? ' sol-empty-col' : ''}" data-tableau="${colIdx}">
               ${col.length === 0
-                ? `<div class="sol-slot" style="width:100%; height:98px; border:none; opacity:0.3;">K</div>`
+                ? `<div class="sol-slot sol-empty-slot" data-tableau="${colIdx}">K</div>`
                 : col.map((card, cardIdx) => this.renderCardHtml(card, 'tableau', colIdx, cardIdx)).join('')
               }
             </div>
@@ -3442,7 +3442,9 @@ class ModSolitaire {
   }
 
   renderCardHtml(card, source, colIdx, cardIdx) {
-    const isSel = this.selected && this.selected.source === source && this.selected.colIdx === colIdx && this.selected.cardIdx === cardIdx;
+    const isSel = this.selected && this.selected.source === source && this.selected.colIdx === colIdx && (
+      source === 'tableau' ? cardIdx >= this.selected.cardIdx : cardIdx === this.selected.cardIdx
+    );
     const isRed = this.suitColors[card.suit] === 'red';
     const sym = this.suitSymbols[card.suit];
     const valStr = this.valueNames[card.val] || card.val;
@@ -3503,8 +3505,12 @@ class ModSolitaire {
     const source = el.getAttribute('data-source');
     const colIdx = parseInt(el.getAttribute('data-col'), 10);
     const cardIdx = parseInt(el.getAttribute('data-idx'), 10);
-    const foundationIdx = el.getAttribute('data-foundation') !== null ? parseInt(el.getAttribute('data-foundation'), 10) : null;
-    const tableauIdx = el.getAttribute('data-tableau') !== null ? parseInt(el.getAttribute('data-tableau'), 10) : null;
+    const foundationIdx = el.getAttribute('data-foundation') !== null
+      ? parseInt(el.getAttribute('data-foundation'), 10)
+      : (el.closest('[data-foundation]') ? parseInt(el.closest('[data-foundation]').getAttribute('data-foundation'), 10) : null);
+    const tableauIdx = el.getAttribute('data-tableau') !== null
+      ? parseInt(el.getAttribute('data-tableau'), 10)
+      : (el.closest('[data-tableau]') ? parseInt(el.closest('[data-tableau]').getAttribute('data-tableau'), 10) : null);
 
     if (source) {
       let card = null;
@@ -3515,7 +3521,9 @@ class ModSolitaire {
       if (!card || !card.faceUp) return;
 
       if (this.selected) {
-        if (this.selected.source === source && this.selected.colIdx === colIdx && this.selected.cardIdx === cardIdx) {
+        const isClickingSelected = this.selected.source === source && this.selected.colIdx === colIdx &&
+          (source === 'tableau' ? cardIdx >= this.selected.cardIdx : cardIdx === this.selected.cardIdx);
+        if (isClickingSelected) {
           this.selected = null;
           this.render();
           return;
@@ -3743,6 +3751,22 @@ class ModSolitaire {
       window.audioController.playSfx(4);
       const el = document.getElementById('sol-score');
       if (el) el.textContent = `${this.score} (WON!)`;
+
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        const timerEl = document.getElementById('sol-timer');
+        const timeStr = timerEl ? timerEl.textContent : '00:00';
+        this.app.showStageOverlay(
+          'SOLITAIRE VICTORY',
+          'All 4 foundations completed!',
+          [
+            { label: 'SCORE', val: this.score },
+            { label: 'MOVES', val: this.moves },
+            { label: 'TIME', val: timeStr }
+          ],
+          () => this.initGame(),
+          { allowReview: true }
+        );
+      }
     }
   }
 
