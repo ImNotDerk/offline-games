@@ -1744,6 +1744,13 @@
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
+.dpad-btn:focus-visible,
+.pill-btn:focus-visible,
+.action-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .speaker-grille {
   display: flex;
   gap: 5px;
@@ -1765,7 +1772,7 @@
 .handheld-chassis.layout-wide {
   max-width: 1180px;
   display: grid;
-  grid-template-columns: 110px 1fr 110px;
+  grid-template-columns: 110px minmax(0, 1fr) 110px;
   grid-template-rows: 1fr auto;
   align-items: center;
   gap: 0.75rem 1rem;
@@ -1788,6 +1795,7 @@
   grid-column: 2;
   grid-row: 1;
   width: 100%;
+  min-width: 0;
   max-width: 940px;
   margin: 0 auto;
 }

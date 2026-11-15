@@ -723,6 +723,7 @@ class App {
     this.setupTheme();
     this.setupCrt();
     this.setupTopAudio();
+    this.setupHandheldControls();
     this.setupGlobalShortcuts();
     this.setupLifecycleHooks();
     this.setupIndexFilters();
@@ -764,7 +765,13 @@ class App {
     const btn = document.getElementById('theme-toggle-btn');
 
     const apply = (theme) => {
-      document.documentElement.setAttribute('data-theme', theme);
+      if (document.documentElement) {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      const chassis = document.getElementById('handheld-chassis');
+      if (chassis) {
+        chassis.setAttribute('data-theme', theme);
+      }
       if (btn) {
         btn.textContent = `THEME: ${THEME_LABELS[theme] || theme.toUpperCase()}`;
       }
@@ -774,7 +781,7 @@ class App {
 
     if (btn) {
       btn.onclick = () => {
-        const cur = document.documentElement.getAttribute('data-theme') || 'arcade';
+        const cur = (document.documentElement && document.documentElement.getAttribute('data-theme')) || 'arcade';
         const curIdx = THEMES.indexOf(cur);
         const next = THEMES[(curIdx + 1) % THEMES.length];
         localStorage.setItem('zenith_retro_theme', next);
@@ -791,8 +798,16 @@ class App {
     const saved = localStorage.getItem('zenith_crt');
     const isCrt = saved !== null ? (saved === 'true' || saved === 'on') : true;
 
+    const getScreenEl = () => document.getElementById('handheld-screen') || document.body;
+
     const apply = (active) => {
-      document.body.classList.toggle('scanlines-on', active);
+      const screenEl = getScreenEl();
+      if (screenEl) {
+        screenEl.classList.toggle('scanlines-on', active);
+        if (screenEl !== document.body && document.body) {
+          document.body.classList.remove('scanlines-on');
+        }
+      }
       if (btn) {
         btn.textContent = `CRT: ${active ? 'ON' : 'OFF'}`;
         btn.classList.toggle('active', active);
@@ -803,7 +818,9 @@ class App {
 
     if (btn) {
       btn.onclick = () => {
-        const next = !document.body.classList.contains('scanlines-on');
+        const screenEl = getScreenEl();
+        const currentActive = screenEl ? screenEl.classList.contains('scanlines-on') : false;
+        const next = !currentActive;
         localStorage.setItem('zenith_crt', String(next));
         apply(next);
         if (window.audioController && window.audioController.playSfx) {
@@ -811,6 +828,42 @@ class App {
         }
       };
     }
+  }
+
+  setupHandheldControls() {
+    const buttons = document.querySelectorAll('.deck-dpad button, .action-buttons button, .deck-options button');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const code = btn.dataset.code;
+        if (!key && !code) return;
+
+        const eventKey = key || code;
+        const eventCode = code || key;
+
+        const evDown = new KeyboardEvent('keydown', {
+          key: eventKey,
+          code: eventCode,
+          bubbles: true,
+          cancelable: true
+        });
+        window.dispatchEvent(evDown);
+
+        setTimeout(() => {
+          const evUp = new KeyboardEvent('keyup', {
+            key: eventKey,
+            code: eventCode,
+            bubbles: true,
+            cancelable: true
+          });
+          window.dispatchEvent(evUp);
+        }, 60);
+
+        if (window.audioController && typeof window.audioController.playSfx === 'function') {
+          window.audioController.playSfx(0);
+        }
+      });
+    });
   }
 
   setupTopAudio() {
@@ -1838,6 +1891,15 @@ class App {
     const statsEl = document.getElementById('stage-stats');
     const actionsEl = document.getElementById('stage-actions');
     const kbdEl = document.getElementById('stage-kbd-hint');
+    const chassis = document.getElementById('handheld-chassis');
+
+    if (chassis) {
+      if (viewName === 'stage' && (moduleId === 'solitaire' || moduleId === 'minesweeper')) {
+        chassis.classList.add('layout-wide');
+      } else {
+        chassis.classList.remove('layout-wide');
+      }
+    }
 
     if (viewName === 'index') {
       this.currentView = 'index';
@@ -1851,10 +1913,10 @@ class App {
       if (indexView) indexView.style.display = 'none';
       if (stageView) stageView.style.display = 'flex';
 
-      mountEl.innerHTML = '';
-      statsEl.innerHTML = '';
-      actionsEl.innerHTML = '';
-      kbdEl.innerHTML = '';
+      if (mountEl) mountEl.innerHTML = '';
+      if (statsEl) statsEl.innerHTML = '';
+      if (actionsEl) actionsEl.innerHTML = '';
+      if (kbdEl) kbdEl.innerHTML = '';
 
       const def = MODULES.find(m => m.id === moduleId);
       if (titleEl) titleEl.textContent = def ? def.title : 'MODULE';
@@ -5633,7 +5695,13 @@ class ModAIStudio {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new App();
-  window.app.init();
-});
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    window.app = new App();
+    window.app.init();
+  });
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { App, MODULES, TUTORIALS };
+}
