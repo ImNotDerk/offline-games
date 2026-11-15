@@ -109,8 +109,54 @@
         </div>
       </div>
 
-      <div id="stage-mount" class="stage-mount">
-        <!-- Module UI rendered here -->
+      <!-- Retro Handheld Console Housing -->
+      <div class="handheld-chassis" id="handheld-chassis">
+        <!-- Handheld Lens & Display Frame -->
+        <div class="handheld-lens">
+          <div class="handheld-lens-header">
+            <div class="handheld-battery">
+              <span class="battery-led" id="battery-led"></span>
+              <span class="battery-label">BATTERY</span>
+            </div>
+            <div class="lens-title">DOT MATRIX WITH STEREO SOUND</div>
+          </div>
+          
+          <!-- Inner Game Screen Viewport -->
+          <div class="handheld-screen" id="handheld-screen">
+            <div id="stage-mount" class="stage-mount">
+              <!-- Active Game UI rendered here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Handheld Lower Control Deck -->
+        <div class="handheld-deck" id="handheld-deck">
+          <div class="deck-dpad" id="deck-dpad" role="group" aria-label="Handheld D-Pad">
+            <button class="dpad-btn dpad-up" data-key="ArrowUp" data-code="ArrowUp" aria-label="Up"></button>
+            <button class="dpad-btn dpad-left" data-key="ArrowLeft" data-code="ArrowLeft" aria-label="Left"></button>
+            <div class="dpad-center"></div>
+            <button class="dpad-btn dpad-right" data-key="ArrowRight" data-code="ArrowRight" aria-label="Right"></button>
+            <button class="dpad-btn dpad-down" data-key="ArrowDown" data-code="ArrowDown" aria-label="Down"></button>
+          </div>
+
+          <div class="deck-meta">
+            <div class="handheld-brand">ZENITH PORTABLE</div>
+            <div class="deck-options">
+              <button class="pill-btn" id="deck-select" data-key="Shift" data-code="ShiftLeft" aria-label="Select">SELECT</button>
+              <button class="pill-btn" id="deck-start" data-key="Enter" data-code="Enter" aria-label="Start">START</button>
+            </div>
+          </div>
+
+          <div class="deck-actions">
+            <div class="action-buttons">
+              <button class="action-btn btn-b" data-key="z" data-code="KeyZ" aria-label="B Button">B</button>
+              <button class="action-btn btn-a" data-key="x" data-code="KeyX" aria-label="A Button">A</button>
+            </div>
+            <div class="speaker-grille">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="stage-footer">
