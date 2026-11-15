@@ -1894,7 +1894,7 @@ class App {
     const chassis = document.getElementById('handheld-chassis');
 
     if (chassis) {
-      if (viewName === 'stage' && (moduleId === 'solitaire' || moduleId === 'minesweeper')) {
+      if (viewName === 'stage' && (moduleId === 'solitaire' || moduleId === 'minesweeper' || moduleId === 'scratchpad' || moduleId === 'aistudio')) {
         chassis.classList.add('layout-wide');
       } else {
         chassis.classList.remove('layout-wide');
@@ -2602,6 +2602,9 @@ class ModWordle {
   }
 
   newGame() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     const seed = BigInt(Math.floor(Math.random() * 1000000000));
     window.wasmBridge.call('wordle_reset', seed);
     this.app.updateTelemetry();
@@ -2644,21 +2647,48 @@ class ModWordle {
     const state = window.wasmBridge.call('wordle_get_state');
     if (state === 1) {
       // Won
-      window.audioController.playSfx(8);
       const curStreak = window.storageManager.getHighScore('wordle_streak') + 1;
       window.storageManager.setHighScore('wordle_streak', curStreak);
       const strEl = document.getElementById('wd-streak');
       if (strEl) strEl.textContent = curStreak;
-      this.showOverlay('SPLENDID', 'Word Solved!', () => this.newGame());
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        const guessCount = window.wasmBridge.call('wordle_get_guess_count');
+        this.app.showStageOverlay(
+          'WORDLE SOLVED',
+          'Splendid deduction!',
+          [
+            { label: 'ATTEMPTS', val: `${guessCount}/6` },
+            { label: 'STREAK', val: curStreak }
+          ],
+          () => this.newGame(),
+          { sfx: 8, allowReview: true }
+        );
+      } else {
+        window.audioController.playSfx(8);
+        this.showOverlay('SPLENDID', 'Word Solved!', () => this.newGame());
+      }
     } else if (state === 2) {
       // Lost
-      window.audioController.playSfx(7);
       window.storageManager.setHighScore('wordle_streak', 0);
       let targetWord = '';
       for (let i = 0; i < 5; i++) {
         targetWord += String.fromCharCode(window.wasmBridge.call('wordle_get_target_char', i));
       }
-      this.showOverlay('OUT OF TRIES', `Target Word: ${targetWord}`, () => this.newGame());
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        this.app.showStageOverlay(
+          'WORDLE FAILED',
+          `The target word was: ${targetWord}`,
+          [
+            { label: 'ANSWER', val: targetWord },
+            { label: 'ATTEMPTS', val: '6/6' }
+          ],
+          () => this.newGame(),
+          { sfx: 7, allowReview: true }
+        );
+      } else {
+        window.audioController.playSfx(7);
+        this.showOverlay('OUT OF TRIES', `Target Word: ${targetWord}`, () => this.newGame());
+      }
     } else {
       window.audioController.playSfx(3);
     }
@@ -2737,6 +2767,9 @@ class ModWordle {
   }
 
   destroy() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     if (this.keyHandler) window.removeEventListener('keydown', this.keyHandler);
   }
 }
@@ -2811,7 +2844,7 @@ class ModTetris {
     document.getElementById('tet-btn-restart').onclick = () => this.restart();
 
     this.keyHandler = (e) => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'c', 'C', 'z', 'Z', 'p', 'P', 'r', 'R'].includes(e.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'c', 'C', 'z', 'Z', 'x', 'X', 'p', 'P', 'r', 'R'].includes(e.key)) {
         e.preventDefault();
       }
 
@@ -2819,7 +2852,7 @@ class ModTetris {
         if (window.wasmBridge.call('tetris_move_h', -1)) { window.audioController.playSfx(1); this.render(); }
       } else if (e.key === 'ArrowRight') {
         if (window.wasmBridge.call('tetris_move_h', 1)) { window.audioController.playSfx(1); this.render(); }
-      } else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'x') {
         if (window.wasmBridge.call('tetris_rotate_cw')) { window.audioController.playSfx(2); this.render(); }
       } else if (e.key.toLowerCase() === 'z') {
         if (window.wasmBridge.call('tetris_rotate_ccw')) { window.audioController.playSfx(2); this.render(); }
@@ -2845,6 +2878,9 @@ class ModTetris {
   }
 
   restart() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     if (this.loopInt) clearInterval(this.loopInt);
     this.isPaused = false;
     const seed = BigInt(Math.floor(Math.random() * 1000000000));
@@ -2985,8 +3021,24 @@ class ModTetris {
 
     if (isOver) {
       if (this.loopInt) clearInterval(this.loopInt);
-      window.audioController.playSfx(7);
-      this.showOverlay('GAME OVER', `Final Score: ${score}`, () => this.restart());
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        const lines = window.wasmBridge.call('tetris_get_lines');
+        const level = window.wasmBridge.call('tetris_get_level');
+        this.app.showStageOverlay(
+          'GAME OVER',
+          'Matrix locked!',
+          [
+            { label: 'SCORE', val: score },
+            { label: 'LINES', val: lines },
+            { label: 'LEVEL', val: level }
+          ],
+          () => this.restart(),
+          { sfx: 7, allowReview: true }
+        );
+      } else {
+        window.audioController.playSfx(7);
+        this.showOverlay('GAME OVER', `Final Score: ${score}`, () => this.restart());
+      }
     }
   }
 
@@ -3079,6 +3131,9 @@ class ModTetris {
   }
 
   destroy() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     if (this.loopInt) clearInterval(this.loopInt);
     if (this.keyHandler) window.removeEventListener('keydown', this.keyHandler);
   }
