@@ -78,3 +78,20 @@ test('outer-ui: retro themes rescoped to handheld chassis and screen', () => {
     );
   }
 });
+
+test('tutorial-dialog: centered modal in the middle of the viewport', () => {
+  const dialogMatch = css.match(/dialog\.tutorial-dialog\s*\{([^}]+)\}/);
+  assert.ok(dialogMatch, 'Must define dialog.tutorial-dialog rule block');
+  const dialogBody = dialogMatch[1];
+
+  assert.match(dialogBody, /position:\s*fixed;/, 'tutorial dialog must have position: fixed to center on screen');
+  assert.match(dialogBody, /inset:\s*0;/, 'tutorial dialog must have inset: 0');
+  assert.match(dialogBody, /margin:\s*auto;/, 'tutorial dialog must have margin: auto to center both horizontally and vertically');
+  assert.match(dialogBody, /border:\s*3px\s+solid/, 'tutorial dialog must have 3px beveled border');
+
+  // Verify modal backdrop styling
+  const backdropMatch = css.match(/dialog::backdrop\s*\{([^}]+)\}/);
+  assert.ok(backdropMatch, 'Must define dialog::backdrop');
+  assert.match(backdropMatch[1], /background-color:\s*rgba\(8,\s*12,\s*20,\s*0\.8\);/, 'backdrop must have dark overlay');
+  assert.match(backdropMatch[1], /backdrop-filter:\s*blur\(4px\);/, 'backdrop must have blur');
+});

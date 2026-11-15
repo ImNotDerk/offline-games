@@ -639,25 +639,103 @@ body {
 
 /* ==================== TUTORIAL MODAL (NATIVE HTML5 DIALOG) ==================== */
 dialog.tutorial-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   padding: 0;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
+  border: 3px solid var(--color-border-strong);
+  border-radius: 8px;
   background: var(--color-bg-surface);
   color: var(--color-text-main);
   max-width: 680px;
-  width: 92vw;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  width: min(92vw, 680px);
+  max-height: 85vh;
+  box-shadow: 4px 4px 0 var(--color-border-strong), 0 20px 60px rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+}
+
+dialog.tutorial-dialog[open] {
+  animation: modal-pop 0.15s ease-out;
+}
+
+@keyframes modal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.tutorial-dialog[open] {
+    animation: none;
+  }
 }
 
 dialog:modal {
   overscroll-behavior: contain;
 }
 
+dialog.tutorial-dialog:modal {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+}
+
 dialog::backdrop {
   overflow: hidden;
   overscroll-behavior: contain;
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(2px);
+  background-color: rgba(8, 12, 20, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Theme variations for Tutorial Modal */
+[data-theme="arcade"] dialog.tutorial-dialog {
+  border-color: #00f0ff;
+  box-shadow: 4px 4px 0 #ff0055, 0 20px 60px rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="gameboy"] dialog.tutorial-dialog {
+  background: #8bac0f;
+  border-color: #0f380f;
+  color: #0f380f;
+  box-shadow: 4px 4px 0 #0f380f;
+}
+
+[data-theme="gameboy"] .tut-header,
+[data-theme="gameboy"] .tut-footer,
+[data-theme="gameboy"] .tut-nav-tabs {
+  background: #9bbc0f;
+  border-color: #0f380f;
+}
+
+[data-theme="gameboy"] .tut-tab {
+  color: #306230;
+}
+
+[data-theme="gameboy"] .tut-tab.active {
+  color: #0f380f;
+  border-bottom-color: #0f380f;
+  background: #8bac0f;
+}
+
+[data-theme="gameboy"] .tut-tag,
+[data-theme="gameboy"] .tut-step-num {
+  color: #0f380f;
+}
+
+[data-theme="amber"] dialog.tutorial-dialog {
+  border-color: #fb8500;
+  box-shadow: 4px 4px 0 #fb8500, 0 0 25px rgba(251, 133, 0, 0.25);
+}
+
+[data-theme="nes"] dialog.tutorial-dialog {
+  border-color: #d82800;
+  box-shadow: 4px 4px 0 #002870, 0 20px 60px rgba(0, 0, 0, 0.9);
 }
 
 .tut-container {
