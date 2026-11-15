@@ -1,85 +1,151 @@
 /**
- * Zenith Industrial / Editorial Design System
- * Zero-emoji, zero-glow, high-efficiency tabular UI adhering to Baseline Web Standards.
+ * Zenith Retro Arcade Design System
+ * 4-mode retro theme carousel, CRT scanlines, and tactile 3D beveled controls.
  */
 
 :root {
-  --bg-page-light: #f5f4f0;
-  --bg-page-dark: #0c0c0e;
-  --bg-surface-light: #ffffff;
-  --bg-surface-dark: #141417;
-  --bg-hover-light: #eceae3;
-  --bg-hover-dark: #1c1c20;
-
-  --text-main-light: #161618;
-  --text-main-dark: #ededf0;
-  --text-muted-light: #706f68;
-  --text-muted-dark: #8a8a93;
-
-  --border-light: #dcdad2;
-  --border-dark: #242429;
-  --border-strong-light: #aba89c;
-  --border-strong-dark: #3a3a42;
-
-  --accent-light: #b45309;
-  --accent-dark: #e5a00d;
-
-  --color-bg-page: light-dark(var(--bg-page-light), var(--bg-page-dark));
-  --color-bg-surface: light-dark(var(--bg-surface-light), var(--bg-surface-dark));
-  --color-bg-hover: light-dark(var(--bg-hover-light), var(--bg-hover-dark));
-  --color-text-main: light-dark(var(--text-main-light), var(--text-main-dark));
-  --color-text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
-  --color-border: light-dark(var(--border-light), var(--border-dark));
-  --color-border-strong: light-dark(var(--border-strong-light), var(--border-strong-dark));
-  --color-accent: light-dark(var(--accent-light), var(--accent-dark));
-
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
 
-  /* High contrast scrollbars adhering to modern web guidance */
-  --scrollbar-track: light-dark(#ebe9e1, #111114);
-  --scrollbar-thumb: light-dark(#a8a599, #383842);
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-
-  color-scheme: light dark;
-}
-
-/* Fallback for browsers without light-dark() support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg-page: var(--bg-page-dark);
-    --color-bg-surface: var(--bg-surface-dark);
-    --color-bg-hover: var(--bg-hover-dark);
-    --color-text-main: var(--text-main-dark);
-    --color-text-muted: var(--text-muted-dark);
-    --color-border: var(--border-dark);
-    --color-border-strong: var(--border-strong-dark);
-    --color-accent: var(--accent-dark);
-  }
-}
-
-html[data-theme="light"] {
-  color-scheme: light;
-  --color-bg-page: var(--bg-page-light);
-  --color-bg-surface: var(--bg-surface-light);
-  --color-bg-hover: var(--bg-hover-light);
-  --color-text-main: var(--text-main-light);
-  --color-text-muted: var(--text-muted-light);
-  --color-border: var(--border-light);
-  --color-border-strong: var(--border-strong-light);
-  --color-accent: var(--accent-light);
-}
-
-html[data-theme="dark"] {
+  /* Default theme: Arcade Neon */
   color-scheme: dark;
-  --color-bg-page: var(--bg-page-dark);
-  --color-bg-surface: var(--bg-surface-dark);
-  --color-bg-hover: var(--bg-hover-dark);
-  --color-text-main: var(--text-main-dark);
-  --color-text-muted: var(--text-muted-dark);
-  --color-border: var(--border-dark);
-  --color-border-strong: var(--border-strong-dark);
-  --color-accent: var(--accent-dark);
+  --color-bg-page: #0a0a14;
+  --color-bg-surface: #121224;
+  --color-bg-hover: #1c1c38;
+  --color-bg-base: #0a0a14;
+  --color-text-main: #f0f0ff;
+  --color-text-muted: #8080a8;
+  --color-border: #262648;
+  --color-border-strong: #ff007f;
+  --color-accent: #00f5d4;
+  --color-accent-alt: #ffbe0b;
+
+  --scrollbar-track: #0a0a14;
+  --scrollbar-thumb: #262648;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* ==================== 4-MODE RETRO THEME ENGINE ==================== */
+
+/* Theme 1: Arcade Neon (Deep obsidian, neon magenta, cyan, arcade yellow) */
+[data-theme="arcade"] {
+  color-scheme: dark;
+  --color-bg-page: #0a0a14;
+  --color-bg-surface: #121224;
+  --color-bg-hover: #1c1c38;
+  --color-bg-base: #0a0a14;
+  --color-text-main: #f0f0ff;
+  --color-text-muted: #8080a8;
+  --color-border: #262648;
+  --color-border-strong: #ff007f;
+  --color-accent: #00f5d4;
+  --color-accent-alt: #ffbe0b;
+  --scrollbar-track: #0a0a14;
+  --scrollbar-thumb: #262648;
+}
+
+/* Theme 2: Game Boy DMG (Authentic 4-shade olive green LCD matrix) */
+[data-theme="gameboy"] {
+  color-scheme: light;
+  --color-bg-page: #8bac0f;
+  --color-bg-surface: #9bbc0f;
+  --color-bg-hover: #93b40e;
+  --color-bg-base: #9bbc0f;
+  --color-text-main: #0f380f;
+  --color-text-muted: #306230;
+  --color-border: #306230;
+  --color-border-strong: #0f380f;
+  --color-accent: #306230;
+  --color-accent-alt: #0f380f;
+  --scrollbar-track: #8bac0f;
+  --scrollbar-thumb: #306230;
+}
+
+/* Theme 3: NES 8-Bit (Famicom charcoal, crimson, cream) */
+[data-theme="nes"] {
+  color-scheme: dark;
+  --color-bg-page: #202024;
+  --color-bg-surface: #2b2b31;
+  --color-bg-hover: #383840;
+  --color-bg-base: #202024;
+  --color-text-main: #fdf0d5;
+  --color-text-muted: #a0a0a8;
+  --color-border: #44444e;
+  --color-border-strong: #d90429;
+  --color-accent: #d90429;
+  --color-accent-alt: #fdf0d5;
+  --scrollbar-track: #202024;
+  --scrollbar-thumb: #44444e;
+}
+
+/* Theme 4: Amber CRT Phosphor (Black, glowing amber, phosphor orange) */
+[data-theme="amber"] {
+  color-scheme: dark;
+  --color-bg-page: #050505;
+  --color-bg-surface: #0f0e08;
+  --color-bg-hover: #1e1b0c;
+  --color-bg-base: #050505;
+  --color-text-main: #ffb703;
+  --color-text-muted: #b58000;
+  --color-border: #3d2c00;
+  --color-border-strong: #fb8500;
+  --color-accent: #ffb703;
+  --color-accent-alt: #fb8500;
+  --scrollbar-track: #050505;
+  --scrollbar-thumb: #3d2c00;
+}
+
+/* Fallback themes */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg-page: #0a0a14;
+  --color-bg-surface: #121224;
+  --color-bg-hover: #1c1c38;
+  --color-bg-base: #0a0a14;
+  --color-text-main: #f0f0ff;
+  --color-text-muted: #8080a8;
+  --color-border: #262648;
+  --color-border-strong: #ff007f;
+  --color-accent: #00f5d4;
+  --color-accent-alt: #ffbe0b;
+  --scrollbar-track: #0a0a14;
+  --scrollbar-thumb: #262648;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-bg-page: #8bac0f;
+  --color-bg-surface: #9bbc0f;
+  --color-bg-hover: #93b40e;
+  --color-bg-base: #9bbc0f;
+  --color-text-main: #0f380f;
+  --color-text-muted: #306230;
+  --color-border: #306230;
+  --color-border-strong: #0f380f;
+  --color-accent: #306230;
+  --color-accent-alt: #0f380f;
+  --scrollbar-track: #8bac0f;
+  --scrollbar-thumb: #306230;
+}
+
+/* ==================== CRT SCANLINES OVERLAY ==================== */
+.scanlines-on::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 9999;
+  pointer-events: none;
 }
 
 * {
@@ -168,26 +234,33 @@ body {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 600;
-  background: transparent;
+  background: var(--color-bg-surface);
   color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 var(--color-border-strong);
   padding: 0.22rem 0.5rem;
   border-radius: 2px;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
   user-select: none;
 }
 
 .top-btn:hover {
   color: var(--color-text-main);
+  background: var(--color-bg-hover);
   border-color: var(--color-border-strong);
 }
 
 .top-btn.active {
   background: var(--color-accent);
-  color: #0c0c0e;
-  border-color: var(--color-accent);
+  color: var(--color-bg-page);
+  border-color: var(--color-border-strong);
   font-weight: 700;
+}
+
+.top-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
 }
 
 .telemetry-pill {
@@ -327,7 +400,8 @@ body {
 
 .filter-chip {
   background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 var(--color-border-strong);
   color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -335,7 +409,8 @@ body {
   padding: 5px 10px;
   border-radius: 2px;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+  user-select: none;
 }
 
 .filter-chip:hover {
@@ -346,7 +421,12 @@ body {
 .filter-chip.active {
   background: var(--color-bg-hover);
   color: var(--color-accent);
-  border-color: var(--color-accent);
+  border-color: var(--color-border-strong);
+}
+
+.filter-chip:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
 }
 
 .index-search-wrap {
@@ -1370,17 +1450,25 @@ dialog::backdrop {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
-  background: transparent;
+  background: var(--color-bg-surface);
   color: var(--color-text-main);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 var(--color-border-strong);
   padding: 0.3rem 0.65rem;
   border-radius: 2px;
   cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease;
+  user-select: none;
 }
 
 .nav-back-btn:hover {
   background: var(--color-bg-hover);
   border-color: var(--color-border-strong);
+}
+
+.nav-back-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
 }
 
 .stage-title {
@@ -1432,10 +1520,13 @@ dialog::backdrop {
   font-weight: 700;
   background: var(--color-bg-surface);
   color: var(--color-text-main);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 var(--color-border-strong);
   padding: 0.3rem 0.7rem;
   border-radius: 2px;
   cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease, color 0.1s ease;
+  user-select: none;
 }
 
 .btn-ctrl:hover {
@@ -1445,8 +1536,71 @@ dialog::backdrop {
 
 .btn-ctrl.btn-primary {
   background: var(--color-accent);
-  color: #0c0c0e;
-  border-color: var(--color-accent);
+  color: var(--color-bg-page);
+  border-color: var(--color-border-strong);
+}
+
+.btn-ctrl:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
+}
+
+/* Base button styling for .stage-btn */
+.stage-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 var(--color-border-strong);
+  padding: 0.3rem 0.7rem;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease, color 0.1s ease;
+  user-select: none;
+}
+
+.stage-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-main);
+  border-color: var(--color-border-strong);
+}
+
+.stage-btn.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-bg-page);
+  border-color: var(--color-border-strong);
+}
+
+.stage-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
+}
+
+/* Tactile 3D Beveled Buttons Grouping Rule */
+.stage-btn,
+.btn-ctrl,
+.keypad-digit-btn,
+button.keypad-digit-btn,
+.filter-chip,
+.top-btn {
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 2px 2px 0 var(--color-border-strong);
+}
+
+.stage-btn:active,
+.btn-ctrl:active,
+.keypad-digit-btn:active,
+button.keypad-digit-btn:active,
+.filter-chip:active,
+.top-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
 }
 
 .btn-select {

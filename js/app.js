@@ -720,6 +720,7 @@ class App {
 
   async init() {
     this.setupTheme();
+    this.setupCrt();
     this.setupTopAudio();
     this.setupGlobalShortcuts();
     this.setupLifecycleHooks();
@@ -744,23 +745,69 @@ class App {
   }
 
   setupTheme() {
-    const saved = localStorage.getItem('zenith_theme') || 'dark';
+    const THEMES = ['arcade', 'gameboy', 'nes', 'amber'];
+    const THEME_LABELS = {
+      arcade: 'ARCADE',
+      gameboy: 'GAME BOY',
+      nes: 'NES',
+      amber: 'AMBER'
+    };
+
+    let saved = localStorage.getItem('zenith_retro_theme');
+    if (!THEMES.includes(saved)) {
+      const legacy = localStorage.getItem('zenith_theme');
+      if (legacy === 'light') saved = 'gameboy';
+      else saved = 'arcade';
+    }
+
     const btn = document.getElementById('theme-toggle-btn');
 
     const apply = (theme) => {
       document.documentElement.setAttribute('data-theme', theme);
-      if (btn) btn.textContent = `THEME: ${theme.toUpperCase()}`;
+      if (btn) {
+        btn.textContent = `THEME: ${THEME_LABELS[theme] || theme.toUpperCase()}`;
+      }
     };
 
     apply(saved);
 
     if (btn) {
       btn.onclick = () => {
-        const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-        const next = cur === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('zenith_theme', next);
+        const cur = document.documentElement.getAttribute('data-theme') || 'arcade';
+        const curIdx = THEMES.indexOf(cur);
+        const next = THEMES[(curIdx + 1) % THEMES.length];
+        localStorage.setItem('zenith_retro_theme', next);
         apply(next);
-        window.audioController.playSfx(0);
+        if (window.audioController && window.audioController.playSfx) {
+          window.audioController.playSfx(0);
+        }
+      };
+    }
+  }
+
+  setupCrt() {
+    const btn = document.getElementById('crt-toggle-btn');
+    const saved = localStorage.getItem('zenith_crt');
+    const isCrt = saved !== null ? (saved === 'true' || saved === 'on') : true;
+
+    const apply = (active) => {
+      document.body.classList.toggle('scanlines-on', active);
+      if (btn) {
+        btn.textContent = `CRT: ${active ? 'ON' : 'OFF'}`;
+        btn.classList.toggle('active', active);
+      }
+    };
+
+    apply(isCrt);
+
+    if (btn) {
+      btn.onclick = () => {
+        const next = !document.body.classList.contains('scanlines-on');
+        localStorage.setItem('zenith_crt', String(next));
+        apply(next);
+        if (window.audioController && window.audioController.playSfx) {
+          window.audioController.playSfx(0);
+        }
       };
     }
   }
