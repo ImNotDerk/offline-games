@@ -1,51 +1,54 @@
 /**
- * LocalStorage Manager for Offline Games & Tools
- * Handles high scores, user preferences, notes, and game saves completely offline.
+ * Zenith Local Storage Manager
+ * Persistent high scores and mid-game state serialization.
  */
-class OfflineStorage {
-  constructor(prefix = 'offline_haven_') {
+
+class StorageManager {
+  constructor(prefix = 'zenith_') {
     this.prefix = prefix;
   }
 
-  get(key, defaultValue = null) {
+  get(key, fallback = null) {
     try {
       const val = localStorage.getItem(this.prefix + key);
-      return val ? JSON.parse(val) : defaultValue;
+      return val ? JSON.parse(val) : fallback;
     } catch (e) {
-      console.warn('Storage read error:', e);
-      return defaultValue;
+      return fallback;
     }
   }
 
-  set(key, value) {
+  set(key, val) {
     try {
-      localStorage.setItem(this.prefix + key, JSON.stringify(value));
-    } catch (e) {
-      console.warn('Storage write error:', e);
-    }
+      localStorage.setItem(this.prefix + key, JSON.stringify(val));
+    } catch (e) {}
   }
 
   getHighScore(gameId) {
-    return this.get(`highscore_${gameId}`, 0);
+    return this.get(`hi_${gameId}`, 0);
   }
 
   setHighScore(gameId, score) {
-    const current = this.getHighScore(gameId);
-    if (score > current) {
-      this.set(`highscore_${gameId}`, score);
-      return { isNewRecord: true, highScore: score };
+    const cur = this.getHighScore(gameId);
+    if (score > cur) {
+      this.set(`hi_${gameId}`, score);
+      return { isNew: true, score };
     }
-    return { isNewRecord: false, highScore: current };
+    return { isNew: false, score: cur };
   }
 
-  getAllHighScores() {
-    const scores = {};
-    const keys = ['tetris', 'snake', '2048', 'spaceRunner', 'minesweeper', 'flappy'];
-    keys.forEach(k => {
-      scores[k] = this.getHighScore(k);
-    });
-    return scores;
+  saveState(gameId, state) {
+    this.set(`state_${gameId}`, state);
+  }
+
+  loadState(gameId) {
+    return this.get(`state_${gameId}`, null);
+  }
+
+  clearState(gameId) {
+    try {
+      localStorage.removeItem(this.prefix + `state_${gameId}`);
+    } catch (e) {}
   }
 }
 
-window.offlineStorage = new OfflineStorage();
+window.storageManager = new StorageManager();
