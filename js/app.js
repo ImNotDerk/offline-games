@@ -1599,6 +1599,242 @@ class App {
     });
   }
 
+  getModulePreviewHtml(moduleId) {
+    switch (moduleId) {
+      case 'sudoku': {
+        const grid = [
+          [5, 3, '', '', 7, '', '', '', ''],
+          [6, '', '', 1, 9, 5, '', '', ''],
+          ['', 9, 8, '', '', '', '', 6, ''],
+          [8, '', '', '', 6, '', '', '', 3],
+          [4, '', '', 8, '', 3, '', '', 1],
+          [7, '', '', '', 2, '', '', '', 6],
+          ['', 6, '', '', '', '', 2, 8, ''],
+          ['', '', '', 4, 1, 9, '', '', 5],
+          ['', '', '', '', 8, '', '', 7, 9]
+        ];
+        let cellsHtml = '';
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) {
+            const val = grid[r][c];
+            let cls = 'mini-sudoku-cell';
+            if (c === 2 || c === 5) cls += ' div-r';
+            if (r === 2 || r === 5) cls += ' div-b';
+            if (r === 4 && c === 4) cls += ' s-active';
+            cellsHtml += `<div class="${cls}">${val}</div>`;
+          }
+        }
+        return `<div class="mini-sudoku-board">${cellsHtml}</div>`;
+      }
+
+      case 'wordle': {
+        return `
+          <div class="mini-wordle-board">
+            <div class="mini-wordle-row">
+              <div class="mini-wordle-tile w-correct">S</div>
+              <div class="mini-wordle-tile w-absent">L</div>
+              <div class="mini-wordle-tile w-present">A</div>
+              <div class="mini-wordle-tile w-absent">T</div>
+              <div class="mini-wordle-tile w-correct">E</div>
+            </div>
+            <div class="mini-wordle-row">
+              <div class="mini-wordle-tile w-correct">S</div>
+              <div class="mini-wordle-tile w-correct">H</div>
+              <div class="mini-wordle-tile w-correct">A</div>
+              <div class="mini-wordle-tile w-correct">R</div>
+              <div class="mini-wordle-tile w-correct">E</div>
+            </div>
+            <div class="mini-wordle-row">
+              <div class="mini-wordle-tile w-empty"></div>
+              <div class="mini-wordle-tile w-empty"></div>
+              <div class="mini-wordle-tile w-empty"></div>
+              <div class="mini-wordle-tile w-empty"></div>
+              <div class="mini-wordle-tile w-empty"></div>
+            </div>
+          </div>
+        `.trim();
+      }
+
+      case 'g2048': {
+        return `
+          <div class="mini-2048-board">
+            <div class="mini-2048-tile tile-2">2</div>
+            <div class="mini-2048-tile tile-4">4</div>
+            <div class="mini-2048-tile tile-8">8</div>
+            <div class="mini-2048-tile tile-16">16</div>
+            <div class="mini-2048-tile tile-empty"></div>
+            <div class="mini-2048-tile tile-32">32</div>
+            <div class="mini-2048-tile tile-64">64</div>
+            <div class="mini-2048-tile tile-128">128</div>
+            <div class="mini-2048-tile tile-empty"></div>
+            <div class="mini-2048-tile tile-empty"></div>
+            <div class="mini-2048-tile tile-4">4</div>
+            <div class="mini-2048-tile tile-8">8</div>
+            <div class="mini-2048-tile tile-empty"></div>
+            <div class="mini-2048-tile tile-empty"></div>
+            <div class="mini-2048-tile tile-2">2</div>
+            <div class="mini-2048-tile tile-2048">2048</div>
+          </div>
+        `.trim();
+      }
+
+      case 'tetris': {
+        const rows = [
+          '..........',
+          '..........',
+          '....t.....',
+          '...ttt....',
+          '..........',
+          '..........',
+          '..ii......',
+          '..iiooss..',
+          'jjjloosstt',
+          'jlllzooss.',
+          'zzllzzooss'
+        ];
+        const pieceMap = {
+          '.': 'tet-empty',
+          'i': 'tet-i',
+          'o': 'tet-o',
+          't': 'tet-t',
+          's': 'tet-s',
+          'z': 'tet-z',
+          'j': 'tet-j',
+          'l': 'tet-l'
+        };
+        let cellsHtml = '';
+        for (const row of rows) {
+          for (let c = 0; c < 10; c++) {
+            const ch = row[c] || '.';
+            const cls = pieceMap[ch] || 'tet-empty';
+            cellsHtml += `<div class="mini-tet-cell ${cls}"></div>`;
+          }
+        }
+        return `<div class="mini-tetris-board">${cellsHtml}</div>`;
+      }
+
+      case 'minesweeper': {
+        const cells = [
+          ['ms-revealed', ''], ['ms-revealed ms-1', '1'], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''],
+          ['ms-revealed', ''], ['ms-revealed ms-1', '1'], ['ms-flag', '⚑'], ['ms-revealed ms-2', '2'], ['ms-revealed ms-1', '1'], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''],
+          ['ms-revealed ms-1', '1'], ['ms-revealed ms-2', '2'], ['ms-revealed ms-2', '2'], ['ms-flag', '⚑'], ['ms-revealed ms-1', '1'], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''],
+          ['ms-unrevealed', ''], ['ms-flag', '⚑'], ['ms-revealed ms-3', '3'], ['ms-revealed ms-2', '2'], ['ms-revealed ms-1', '1'], ['ms-unrevealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''],
+          ['ms-unrevealed', ''], ['ms-revealed ms-2', '2'], ['ms-flag', '⚑'], ['ms-revealed ms-1', '1'], ['ms-revealed', ''], ['ms-revealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', ''],
+          ['ms-unrevealed', ''], ['ms-revealed ms-1', '1'], ['ms-revealed ms-1', '1'], ['ms-revealed ms-1', '1'], ['ms-revealed', ''], ['ms-revealed', ''], ['ms-unrevealed', ''], ['ms-unrevealed', '']
+        ];
+        const cellsHtml = cells.map(([cls, txt]) => `<div class="mini-ms-cell ${cls}">${txt}</div>`).join('');
+        return `<div class="mini-ms-board">${cellsHtml}</div>`;
+      }
+
+      case 'scratchpad': {
+        return `
+          <div class="mini-scratch-board">
+            <div class="mini-scratch-pane">
+              <div class="mini-scratch-h1"># ZENITH DOC</div>
+              <div class="mini-scratch-line"><span class="mini-scratch-bullet">-</span> Offline OS</div>
+              <div class="mini-scratch-line"><span class="mini-scratch-bullet">-</span> 10 Cartridges</div>
+              <div class="mini-scratch-line"><span class="mini-scratch-code">wasm-opt -O3</span></div>
+            </div>
+            <div class="mini-scratch-pane">
+              <div class="mini-scratch-h1" style="color:var(--color-text-main, #f8fafc)">ZENITH DOC</div>
+              <div class="mini-scratch-line">&bull; Offline OS</div>
+              <div class="mini-scratch-line">&bull; 10 Cartridges</div>
+              <div class="mini-scratch-line"><span class="mini-scratch-code" style="background:#0f172a; border:1px solid #334155;">wasm-opt -O3</span></div>
+            </div>
+          </div>
+        `.trim();
+      }
+
+      case 'solitaire': {
+        return `
+          <div class="mini-sol-board">
+            <div class="mini-sol-top">
+              <div class="mini-sol-slot mini-sol-foundation">A&spades;</div>
+              <div class="mini-sol-slot mini-sol-foundation" style="border-color:#ef4444; color:#ef4444;">A&hearts;</div>
+              <div class="mini-sol-slot"></div>
+              <div class="mini-sol-slot mini-sol-card-back"></div>
+            </div>
+            <div class="mini-sol-tableau">
+              <div class="mini-sol-col">
+                <div class="mini-sol-card card-black">K&spades;</div>
+                <div class="mini-sol-card cascade card-red">Q&hearts;</div>
+                <div class="mini-sol-card cascade card-black">J&clubs;</div>
+              </div>
+              <div class="mini-sol-col">
+                <div class="mini-sol-card-back"></div>
+                <div class="mini-sol-card cascade card-red">10&diams;</div>
+                <div class="mini-sol-card cascade card-black">9&spades;</div>
+              </div>
+              <div class="mini-sol-col">
+                <div class="mini-sol-card-back"></div>
+                <div class="mini-sol-card-back cascade"></div>
+                <div class="mini-sol-card cascade card-red">7&hearts;</div>
+              </div>
+            </div>
+          </div>
+        `.trim();
+      }
+
+      case 'connect4': {
+        const board = [
+          [0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 'r-win', 0, 0, 0, 0],
+          [0, 0, 'y', 'r-win', 0, 0, 0],
+          [0, 'r', 'y', 'y', 'r-win', 0, 0],
+          ['y', 'r', 'y', 'r', 'y', 'r-win', 0]
+        ];
+        let slotsHtml = '';
+        for (let r = 0; r < 6; r++) {
+          for (let c = 0; c < 7; c++) {
+            const piece = board[r][c];
+            let disc = '';
+            if (piece === 'r') disc = '<div class="c4-red"></div>';
+            else if (piece === 'y') disc = '<div class="c4-yellow"></div>';
+            else if (piece === 'r-win') disc = '<div class="c4-red c4-win"></div>';
+            slotsHtml += `<div class="mini-c4-slot">${disc}</div>`;
+          }
+        }
+        return `<div class="mini-c4-board">${slotsHtml}</div>`;
+      }
+
+      case 'tictactoe': {
+        return `
+          <div class="mini-ttt-board">
+            <div class="mini-ttt-cell"><span class="ttt-x">X</span></div>
+            <div class="mini-ttt-cell"><span class="ttt-o">O</span></div>
+            <div class="mini-ttt-cell"><span class="ttt-o">O</span></div>
+            <div class="mini-ttt-cell"><span class="ttt-o">O</span></div>
+            <div class="mini-ttt-cell"><span class="ttt-x">X</span></div>
+            <div class="mini-ttt-cell"></div>
+            <div class="mini-ttt-cell"></div>
+            <div class="mini-ttt-cell"></div>
+            <div class="mini-ttt-cell"><span class="ttt-x">X</span></div>
+            <div class="mini-ttt-strike"></div>
+          </div>
+        `.trim();
+      }
+
+      case 'aistudio': {
+        return `
+          <div class="mini-ai-board">
+            <div>
+              <div class="mini-ai-prompt">&gt; ollama run llama3</div>
+              <div class="mini-ai-response">Model loaded into VRAM. System ready. Generating inference stream...</div>
+            </div>
+            <div class="mini-ai-prompt" style="margin-top:auto;">
+              <span>&gt; prompt:</span>
+              <span class="mini-ai-cursor"></span>
+            </div>
+          </div>
+        `.trim();
+      }
+
+      default:
+        return '';
+    }
+  }
+
   renderIndex() {
     const gridEl = document.getElementById('index-grid');
     if (!gridEl) return;
@@ -1626,67 +1862,82 @@ class App {
 
     filtered.forEach(mod => {
       const card = document.createElement('div');
-      card.className = 'index-card';
+      card.className = 'cartridge-card';
       card.tabIndex = 0;
+      card.setAttribute('data-id', mod.id);
+      card.setAttribute('data-key', mod.key);
 
       let scoreLabel = '';
       if (['sudoku', 'wordle', 'g2048', 'tetris', 'minesweeper', 'solitaire'].includes(mod.id)) {
         const hs = window.storageManager.getHighScore(mod.id);
-        scoreLabel = `<span class="card-score">BEST: <strong>${hs}</strong></span>`;
+        scoreLabel = `<span class="cartridge-score card-score">BEST: <strong>${hs}</strong></span>`;
       } else if (mod.id === 'connect4') {
         const wins = window.storageManager.get('c4_wins_p1', 0);
-        scoreLabel = `<span class="card-score">WINS: <strong>${wins}</strong></span>`;
+        scoreLabel = `<span class="cartridge-score card-score">WINS: <strong>${wins}</strong></span>`;
       } else if (mod.id === 'tictactoe') {
         const wins = window.storageManager.get('ttt_wins_x', 0);
-        scoreLabel = `<span class="card-score">WINS: <strong>${wins}</strong></span>`;
+        scoreLabel = `<span class="cartridge-score card-score">WINS: <strong>${wins}</strong></span>`;
       } else if (mod.id === 'aistudio') {
-        scoreLabel = `<span class="card-score">OLLAMA READY</span>`;
+        scoreLabel = `<span class="cartridge-score card-score">OLLAMA READY</span>`;
       } else {
-        scoreLabel = `<span class="card-score">LOCAL STUDIO</span>`;
+        scoreLabel = `<span class="cartridge-score card-score">LOCAL STUDIO</span>`;
       }
 
       card.innerHTML = `
-        <div>
-          <div class="card-meta">
-            <span class="card-num">${mod.num}</span>
-            <span class="card-shortcut">[${mod.key}]</span>
-          </div>
-          <h2 class="card-title">${mod.title}</h2>
-          <p class="card-desc">${mod.desc}</p>
-          <div class="card-visual">
-            <span style="color:var(--color-accent); font-weight:700;">&gt;</span>
-            <span>${mod.visual || mod.cat}</span>
-          </div>
+        <div class="cartridge-top-grooves">
+          <div class="cartridge-groove"></div>
+          <div class="cartridge-groove"></div>
+          <div class="cartridge-groove"></div>
         </div>
-        <div>
-          <div class="card-footer">
-            <span>${mod.cat}</span>
+
+        <div class="cartridge-sticker">
+          <div class="cartridge-sticker-header">
+            <h3 class="cartridge-sticker-title">${mod.title}</h3>
+            <span class="cartridge-sticker-badge">ZENITH-${mod.num}</span>
+          </div>
+
+          <div class="cartridge-preview-window">
+            ${this.getModulePreviewHtml(mod.id)}
+          </div>
+
+          <div class="cartridge-sticker-footer">
+            <span class="cartridge-cat">${mod.cat}</span>
             ${scoreLabel}
           </div>
-          <div class="card-actions">
-            <button class="card-btn-tut" data-tut="${mod.id}" title="Read tutorial and strategy guide">[?] HOW TO PLAY</button>
-            <button class="card-btn-launch" data-launch="${mod.id}" title="Launch module immediately">LAUNCH [${mod.key}] &rarr;</button>
-          </div>
+        </div>
+
+        <div class="cartridge-actions-bar">
+          <button class="cart-btn-tut" data-tut="${mod.id}" title="Read tutorial and strategy guide">[?] GUIDE</button>
+          <button class="cart-btn-insert" data-launch="${mod.id}" title="Insert cartridge and play">INSERT [${mod.key}] &rarr;</button>
         </div>
       `;
 
-      card.querySelector('.card-btn-tut').onclick = (e) => {
-        e.stopPropagation();
-        this.openTutorial(mod.id);
-      };
+      const tutBtn = card.querySelector('.cart-btn-tut');
+      if (tutBtn) {
+        tutBtn.onclick = (e) => {
+          e.stopPropagation();
+          this.openTutorial(mod.id);
+        };
+      }
 
       const launch = () => {
         window.audioController.playSfx(0);
         this.switchView('stage', mod.id);
       };
 
-      card.querySelector('.card-btn-launch').onclick = (e) => {
-        e.stopPropagation();
-        launch();
-      };
+      const insertBtn = card.querySelector('.cart-btn-insert');
+      if (insertBtn) {
+        insertBtn.onclick = (e) => {
+          e.stopPropagation();
+          launch();
+        };
+      }
 
       card.onclick = launch;
       card.onkeydown = (e) => {
+        if (e.target !== card && e.target !== insertBtn) {
+          return;
+        }
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           launch();
