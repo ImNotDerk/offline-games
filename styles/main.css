@@ -637,6 +637,894 @@ body {
   border-color: var(--color-accent);
 }
 
+/* ==================== RETRO GAME CARTRIDGE CASING & PREVIEWS ==================== */
+
+/* Molded Plastic Cartridge Shell */
+.cartridge-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 250px;
+  margin-bottom: 8px;
+  padding: 12px 12px 14px 12px;
+  background: linear-gradient(180deg, #1e2638 0%, #161d2d 100%);
+  border: 3px solid var(--color-border-strong, #334155);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -2px 0 rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.cartridge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), 0 0 12px rgba(56, 189, 248, 0.25);
+  border-color: var(--color-border-strong, #475569);
+}
+
+.cartridge-card:focus-visible {
+  outline: 2px solid var(--color-accent, #38bdf8);
+  outline-offset: 2px;
+}
+
+/* Bottom PCB Edge Connector Notch with Gold Contact Pins */
+.cartridge-card::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65%;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #d97706 0px, #f59e0b 2px, #b45309 4px, #0f172a 4px, #0f172a 8px);
+  border-left: 2px solid #0f172a;
+  border-right: 2px solid #0f172a;
+  border-bottom: 2px solid #b45309;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Top Finger Grip Slots */
+.cartridge-top-grooves {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.cartridge-groove {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Metallic Glossy Sticker Label */
+.cartridge-sticker {
+  background: linear-gradient(135deg, #111827 0%, #0f172a 50%, #1e1b4b 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.cartridge-sticker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.cartridge-sticker-title {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.cartridge-sticker-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+}
+
+.cartridge-preview-window {
+  background: #05070d;
+  border: 1.5px solid rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  height: 110px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.cartridge-sticker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.cartridge-cat {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cartridge-score {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.cartridge-score strong {
+  color: var(--color-accent, #38bdf8);
+}
+
+/* Actions Bar & Tactile Retro Bevel Buttons */
+.cartridge-actions-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.cart-btn-tut {
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 0 #0f172a;
+  user-select: none;
+}
+
+.cart-btn-tut:hover {
+  border-color: #475569;
+  color: #f8fafc;
+  background: #334155;
+}
+
+.cart-btn-tut:active {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transform: translateY(1px);
+}
+
+.cart-btn-insert {
+  flex: 1;
+  background: #0284c7;
+  border: 1.5px solid #38bdf8;
+  color: #f0f9ff;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 0 #0369a1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.cart-btn-insert:hover {
+  background: #0ea5e9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 0 #0284c7, 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.cart-btn-insert:active {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transform: translateY(1px);
+}
+
+/* ==================== MINI-SCREENSHOT PIXEL ART BOARDS ==================== */
+
+/* 1. Sudoku Mini Board (9x9 Grid with 3x3 dividers and active highlight) */
+.mini-sudoku-board {
+  display: grid;
+  grid-template-columns: repeat(9, 10px);
+  grid-template-rows: repeat(9, 10px);
+  gap: 1px;
+  background: #334155;
+  border: 1.5px solid #64748b;
+  padding: 1px;
+  border-radius: 2px;
+}
+
+.mini-sudoku-cell {
+  width: 10px;
+  height: 10px;
+  background: #0a0f1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  color: #94a3b8;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mini-sudoku-board .div-r {
+  border-right: 1.5px solid #64748b;
+}
+
+.mini-sudoku-board .div-b {
+  border-bottom: 1.5px solid #64748b;
+}
+
+.mini-sudoku-cell.s-active {
+  background: rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+/* 2. Wordle Mini Board (3 rows of 5 tiles with correct, present, absent states) */
+.mini-wordle-board {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-wordle-row {
+  display: flex;
+  gap: 4px;
+}
+
+.mini-wordle-tile {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  border-radius: 2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.mini-wordle-tile.w-correct {
+  background: #15803d;
+  color: #ffffff;
+  border: 1px solid #22c55e;
+}
+
+.mini-wordle-tile.w-present {
+  background: #b45309;
+  color: #ffffff;
+  border: 1px solid #f59e0b;
+}
+
+.mini-wordle-tile.w-absent {
+  background: #1e293b;
+  color: #64748b;
+  border: 1px solid #334155;
+}
+
+.mini-wordle-tile.w-empty {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: transparent;
+}
+
+/* 3. 2048 Mini Board (4x4 Grid with colored numeric tile badges) */
+.mini-2048-board {
+  display: grid;
+  grid-template-columns: repeat(4, 20px);
+  grid-template-rows: repeat(4, 20px);
+  gap: 3px;
+  padding: 3px;
+  background: #1e293b;
+  border-radius: 4px;
+  border: 1px solid #334155;
+}
+
+.mini-2048-tile {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 8px;
+  line-height: 1;
+}
+
+.mini-2048-tile.tile-empty {
+  background: #0f172a;
+}
+
+.mini-2048-tile.tile-2 {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.mini-2048-tile.tile-4 {
+  background: #475569;
+  color: #f8fafc;
+}
+
+.mini-2048-tile.tile-8 {
+  background: #ea580c;
+  color: #ffffff;
+}
+
+.mini-2048-tile.tile-16 {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.mini-2048-tile.tile-32 {
+  background: #e11d48;
+  color: #ffffff;
+}
+
+.mini-2048-tile.tile-64 {
+  background: #f43f5e;
+  color: #ffffff;
+}
+
+.mini-2048-tile.tile-128 {
+  background: #eab308;
+  color: #0f172a;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.mini-2048-tile.tile-2048 {
+  background: #facc15;
+  color: #0f172a;
+  font-size: 6.5px;
+  font-weight: 900;
+  box-shadow: 0 0 8px #facc15;
+}
+
+/* 4. Tetris Mini Board (10x11 matrix with neon falling piece and stacked tetrominoes) */
+.mini-tetris-board {
+  display: grid;
+  grid-template-columns: repeat(10, 8px);
+  grid-template-rows: repeat(11, 8px);
+  gap: 1px;
+  width: 89px;
+  height: 98px;
+  background: #070b14;
+  border: 1px solid #1e293b;
+  padding: 2px;
+  border-radius: 2px;
+}
+
+.mini-tet-cell {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+}
+
+.mini-tet-cell.tet-empty {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mini-tet-cell.tet-i {
+  background: #06b6d4;
+  box-shadow: inset 0 0 2px #67e8f9;
+}
+
+.mini-tet-cell.tet-o {
+  background: #eab308;
+  box-shadow: inset 0 0 2px #fef08a;
+}
+
+.mini-tet-cell.tet-t {
+  background: #a855f7;
+  box-shadow: inset 0 0 2px #d8b4fe;
+}
+
+.mini-tet-cell.tet-s {
+  background: #22c55e;
+  box-shadow: inset 0 0 2px #86efac;
+}
+
+.mini-tet-cell.tet-z {
+  background: #ef4444;
+  box-shadow: inset 0 0 2px #fca5a5;
+}
+
+.mini-tet-cell.tet-j {
+  background: #3b82f6;
+  box-shadow: inset 0 0 2px #93c5fd;
+}
+
+.mini-tet-cell.tet-l {
+  background: #f97316;
+  box-shadow: inset 0 0 2px #fdba74;
+}
+
+/* 5. Minesweeper Mini Board (8x6 grid with revealed cells, flags, and 3D tiles) */
+.mini-ms-board {
+  display: grid;
+  grid-template-columns: repeat(8, 12px);
+  grid-template-rows: repeat(6, 12px);
+  gap: 2px;
+  background: #0a0f1d;
+  padding: 3px;
+  border: 1px solid #1e293b;
+  border-radius: 2px;
+}
+
+.mini-ms-cell {
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  border-radius: 1px;
+  line-height: 1;
+}
+
+.mini-ms-cell.ms-unrevealed {
+  background: #334155;
+  border-top: 1.5px solid #64748b;
+  border-left: 1.5px solid #64748b;
+  border-right: 1.5px solid #1e293b;
+  border-bottom: 1.5px solid #1e293b;
+}
+
+.mini-ms-cell.ms-revealed {
+  background: #0f172a;
+  border: 0.5px solid #1e293b;
+}
+
+.mini-ms-cell.ms-1 {
+  color: #38bdf8;
+}
+
+.mini-ms-cell.ms-2 {
+  color: #4ade80;
+}
+
+.mini-ms-cell.ms-3 {
+  color: #f87171;
+}
+
+.mini-ms-cell.ms-4 {
+  color: #818cf8;
+}
+
+.mini-ms-cell.ms-flag {
+  background: #334155;
+  color: #ef4444;
+  font-size: 8px;
+  border-top: 1.5px solid #64748b;
+  border-left: 1.5px solid #64748b;
+  border-right: 1.5px solid #1e293b;
+  border-bottom: 1.5px solid #1e293b;
+}
+
+/* 6. Scratchpad Mini Board (Split editor preview with # TITLE & markdown lines) */
+.mini-scratch-board {
+  width: 140px;
+  height: 90px;
+  background: #090d16;
+  border: 1px solid #1e293b;
+  border-radius: 3px;
+  display: flex;
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.mini-scratch-pane {
+  flex: 1;
+  padding: 6px;
+  font-size: 6.5px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mini-scratch-pane:first-child {
+  border-right: 1px solid #1e293b;
+}
+
+.mini-scratch-h1 {
+  color: #38bdf8;
+  font-weight: 800;
+  font-size: 7.5px;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.mini-scratch-line {
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.mini-scratch-bullet {
+  color: #34d399;
+  font-weight: bold;
+}
+
+.mini-scratch-code {
+  background: #1e293b;
+  color: #fbbf24;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-size: 6px;
+}
+
+/* 7. Solitaire Mini Board (Cascading cards tableau stacks & Ace foundation slot) */
+.mini-sol-board {
+  width: 130px;
+  height: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  justify-content: center;
+}
+
+.mini-sol-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.mini-sol-slot {
+  width: 22px;
+  height: 28px;
+  border: 1px dashed #334155;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-family: var(--font-mono);
+}
+
+.mini-sol-foundation {
+  background: #0f172a;
+  border: 1px solid #38bdf8;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.mini-sol-tableau {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.mini-sol-col {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 24px;
+}
+
+.mini-sol-card {
+  width: 24px;
+  height: 32px;
+  background: #ffffff;
+  border-radius: 2px;
+  border: 1px solid #94a3b8;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  line-height: 1;
+}
+
+.mini-sol-card.cascade {
+  margin-top: -18px;
+}
+
+.mini-sol-card.card-red {
+  color: #dc2626;
+}
+
+.mini-sol-card.card-black {
+  color: #0f172a;
+}
+
+.mini-sol-card-back {
+  width: 24px;
+  height: 32px;
+  border-radius: 2px;
+  border: 1px solid #60a5fa;
+  background: repeating-linear-gradient(45deg, #1e40af 0, #1e40af 2px, #1d4ed8 2px, #1d4ed8 4px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 8. Connect 4 Mini Board (7x6 blue matrix with circular cutouts & winning diagonal) */
+.mini-c4-board {
+  display: grid;
+  grid-template-columns: repeat(7, 13px);
+  grid-template-rows: repeat(6, 13px);
+  gap: 2px;
+  background: #1d4ed8;
+  padding: 4px;
+  border-radius: 4px;
+  border: 2px solid #1e40af;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.mini-c4-slot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #070b14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-c4-slot .c4-red {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f87171, #dc2626);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.mini-c4-slot .c4-yellow {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fde047, #eab308);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.mini-c4-slot .c4-win {
+  box-shadow: 0 0 6px #ffffff, inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+/* 9. Tic-Tac-Toe Mini Board (3x3 grid with neon X, pink O, and winning strike line) */
+.mini-ttt-board {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  position: relative;
+  background: #070b14;
+  border: 1.5px solid #334155;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.mini-ttt-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 900;
+  border: 1px solid #1e293b;
+  line-height: 1;
+}
+
+.mini-ttt-cell .ttt-x {
+  color: #38bdf8;
+  text-shadow: 0 0 6px #38bdf8;
+}
+
+.mini-ttt-cell .ttt-o {
+  color: #f43f5e;
+  text-shadow: 0 0 6px #f43f5e;
+}
+
+.mini-ttt-strike {
+  position: absolute;
+  height: 3px;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+  border-radius: 2px;
+  z-index: 5;
+  top: 50%;
+  left: 6px;
+  width: calc(100% - 12px);
+  transform: translateY(-50%) rotate(45deg);
+  transform-origin: center;
+  pointer-events: none;
+}
+
+/* 10. AI Studio Mini Board (CRT green terminal text with blinking cursor) */
+.mini-ai-board {
+  width: 140px;
+  height: 90px;
+  background: #050d0a;
+  border: 1px solid #064e3b;
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  color: #34d399;
+  font-size: 7.5px;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.15);
+}
+
+.mini-ai-prompt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.mini-ai-response {
+  color: #6ee7b7;
+  font-size: 6.8px;
+  margin-top: 2px;
+}
+
+.mini-ai-cursor {
+  display: inline-block;
+  width: 5px;
+  height: 8px;
+  background: #34d399;
+  vertical-align: middle;
+  animation: ai-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ai-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* ==================== THEME VARIATIONS FOR CARTRIDGE PLASTICS ==================== */
+
+/* Theme 1: Game Boy DMG (Light olive-gray plastic with dark olive border) */
+[data-theme="gameboy"] .cartridge-card {
+  background: linear-gradient(180deg, #9ca086 0%, #878c71 100%);
+  border-color: #306230;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="gameboy"] .cartridge-groove {
+  background: rgba(15, 56, 15, 0.45);
+}
+
+[data-theme="gameboy"] .cartridge-sticker {
+  background: linear-gradient(135deg, #1b261b 0%, #0f1c0f 100%);
+  border-color: #306230;
+}
+
+[data-theme="gameboy"] .cartridge-sticker-title {
+  color: #8bac0f;
+}
+
+[data-theme="gameboy"] .cartridge-sticker-badge {
+  color: #9bbc0f;
+  border-color: #306230;
+  background: rgba(15, 56, 15, 0.4);
+}
+
+[data-theme="gameboy"] .cart-btn-tut {
+  background: #306230;
+  border-color: #0f380f;
+  color: #8bac0f;
+}
+
+[data-theme="gameboy"] .cart-btn-insert {
+  background: #0f380f;
+  border-color: #306230;
+  color: #9bbc0f;
+  box-shadow: 0 2px 0 #051605;
+}
+
+/* Theme 2: Arcade Neon (Deep midnight violet plastic with neon cyan border and magenta badge) */
+[data-theme="arcade"] .cartridge-card {
+  background: linear-gradient(180deg, #1f1435 0%, #150d24 100%);
+  border-color: #00f0ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -2px 0 rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 240, 255, 0.2);
+}
+
+[data-theme="arcade"] .cartridge-sticker-badge {
+  color: #ff007f;
+  border-color: #ff007f;
+  background: rgba(255, 0, 127, 0.15);
+}
+
+[data-theme="arcade"] .cart-btn-insert {
+  background: #ff007f;
+  border-color: #ff007f;
+  box-shadow: 0 2px 0 #b30059;
+}
+
+/* Theme 3: NES 8-Bit (Console two-tone gray plastic with red accent border) */
+[data-theme="nes"] .cartridge-card {
+  background: linear-gradient(180deg, #3d3d45 0%, #2b2b32 100%);
+  border-color: #d90429;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -2px 0 rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="nes"] .cartridge-sticker-badge {
+  color: #fc9838;
+  border-color: #d90429;
+  background: rgba(217, 4, 41, 0.15);
+}
+
+[data-theme="nes"] .cart-btn-insert {
+  background: #d90429;
+  border-color: #fc9838;
+  box-shadow: 0 2px 0 #8c0219;
+}
+
+/* Theme 4: Amber CRT Phosphor (Vintage dark amber/charcoal plastic with warm phosphor border) */
+[data-theme="amber"] .cartridge-card {
+  background: linear-gradient(180deg, #241a0d 0%, #181208 100%);
+  border-color: #d97706;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -2px 0 rgba(0, 0, 0, 0.6), 0 0 14px rgba(245, 158, 11, 0.2);
+}
+
+[data-theme="amber"] .cartridge-sticker-badge {
+  color: #fbbf24;
+  border-color: #d97706;
+  background: rgba(217, 119, 6, 0.15);
+}
+
+[data-theme="amber"] .cart-btn-insert {
+  background: #d97706;
+  border-color: #f59e0b;
+  box-shadow: 0 2px 0 #92400e;
+}
+
+
 /* ==================== TUTORIAL MODAL (NATIVE HTML5 DIALOG) ==================== */
 dialog.tutorial-dialog {
   position: fixed;
