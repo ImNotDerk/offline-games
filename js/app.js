@@ -716,6 +716,7 @@ class App {
     this.activeTutorialModule = null;
     this.activeTutorialStep = 0;
     this.tutorialStepCompleted = false;
+    this._stageOverlayKeyHandler = null;
   }
 
   async init() {
@@ -1643,7 +1644,185 @@ class App {
     });
   }
 
+  removeStageOverlay() {
+    if (this._stageOverlayKeyHandler) {
+      window.removeEventListener('keydown', this._stageOverlayKeyHandler, true);
+      this._stageOverlayKeyHandler = null;
+    }
+    const mountEl = document.getElementById('stage-mount');
+    if (mountEl) {
+      const existing = mountEl.querySelectorAll('.stage-overlay');
+      existing.forEach(el => el.remove());
+    }
+  }
+
+  showStageOverlay(title, subtitle, stats = [], onRestart, options = {}) {
+    const mountEl = document.getElementById('stage-mount');
+    if (!mountEl) return null;
+
+    // Remove any previous overlay and listeners
+    this.removeStageOverlay();
+
+    // Trigger chiptune audio SFX: play SFX 8 (victory) or SFX 7 (game over) based on title/options
+    let sfxId = 8;
+    if (options && options.sfx !== undefined) {
+      sfxId = options.sfx;
+    } else if (options && (options.isGameOver || options.defeat || options.isWin === false)) {
+      sfxId = 7;
+    } else if (options && (options.isWin || options.victory)) {
+      sfxId = 8;
+    } else {
+      const t = String(title || '').toUpperCase();
+      if (t.includes('OVER') || t.includes('DEFEAT') || t.includes('LOST') || t.includes('BUST') || t.includes('DETONAT') || t.includes('FAIL')) {
+        sfxId = 7;
+      } else {
+        sfxId = 8;
+      }
+    }
+    if (window.audioController && typeof window.audioController.playSfx === 'function') {
+      window.audioController.playSfx(sfxId);
+    }
+
+    const ov = document.createElement('div');
+    ov.className = 'stage-overlay';
+
+    // Arcade status header tag
+    const defaultTag = sfxId === 7
+      ? '★ GAME OVER ★'
+      : (/win|victor|solved|clear/i.test(title || '') ? '★ VICTORY ★' : '★ MATCH FINISHED ★');
+    const tag = (options && (options.statusTag || options.tag)) || defaultTag;
+
+    // Render stats summary chips grid
+    let statsHtml = '';
+    if (Array.isArray(stats) && stats.length > 0) {
+      const chips = stats.map(s => {
+        let lbl = '';
+        let val = '';
+        if (s && typeof s === 'object') {
+          lbl = s.label || '';
+          val = s.val !== undefined ? s.val : (s.value !== undefined ? s.value : '');
+        } else {
+          val = String(s);
+        }
+        return `
+          <div class="overlay-stat-chip">
+            ${lbl ? `<span class="stat-label">${lbl}</span>` : ''}
+            <span class="stat-val">${val}</span>
+          </div>
+        `;
+      }).join('');
+      statsHtml = `<div class="overlay-stats">${chips}</div>`;
+    }
+
+    // Render action buttons
+    let actionsHtml = '';
+    if (onRestart) {
+      actionsHtml += `<button class="stage-btn btn-primary" id="stage-ov-btn-restart">[R] PLAY AGAIN</button>`;
+    }
+    if (options && options.allowReview) {
+      actionsHtml += `<button class="stage-btn" id="stage-ov-btn-review">[EYE] REVIEW BOARD</button>`;
+    }
+    actionsHtml += `<button class="stage-btn" id="stage-ov-btn-index">[ESC] RETURN TO HUB</button>`;
+
+    // Render floating review minibar if allowReview is true
+    const minibarHtml = (options && options.allowReview) ? `
+      <div class="overlay-minibar">
+        <span>★ MATCH OVER — REVIEWING BOARD ★</span>
+        <button class="stage-btn" id="stage-ov-btn-reopen">SHOW RESULTS</button>
+        <button class="stage-btn btn-primary" id="stage-ov-btn-restart-mini">[R] PLAY AGAIN</button>
+      </div>
+    ` : '';
+
+    ov.innerHTML = `
+      <div class="retro-box">
+        <div class="overlay-arcade-tag">${tag}</div>
+        <h2 class="overlay-title">${title || ''}</h2>
+        ${subtitle ? `<p class="overlay-subtitle">${subtitle}</p>` : ''}
+        ${statsHtml}
+        <div class="overlay-actions">
+          ${actionsHtml}
+        </div>
+      </div>
+      ${minibarHtml}
+    `;
+
+    mountEl.appendChild(ov);
+
+    let isReviewing = false;
+    const setReviewMode = (reviewing) => {
+      isReviewing = reviewing;
+      if (reviewing) {
+        ov.classList.add('banner-mode');
+      } else {
+        ov.classList.remove('banner-mode');
+      }
+    };
+
+    // Attach click handlers
+    const restartBtn = ov.querySelector('#stage-ov-btn-restart');
+    if (restartBtn) {
+      restartBtn.onclick = () => {
+        this.removeStageOverlay();
+        if (typeof onRestart === 'function') onRestart();
+      };
+    }
+
+    const reviewBtn = ov.querySelector('#stage-ov-btn-review');
+    if (reviewBtn) {
+      reviewBtn.onclick = () => {
+        setReviewMode(true);
+      };
+    }
+
+    const indexBtn = ov.querySelector('#stage-ov-btn-index');
+    if (indexBtn) {
+      indexBtn.onclick = () => {
+        this.removeStageOverlay();
+        this.switchView('index');
+      };
+    }
+
+    const reopenBtn = ov.querySelector('#stage-ov-btn-reopen');
+    if (reopenBtn) {
+      reopenBtn.onclick = () => {
+        setReviewMode(false);
+      };
+    }
+
+    const restartMiniBtn = ov.querySelector('#stage-ov-btn-restart-mini');
+    if (restartMiniBtn) {
+      restartMiniBtn.onclick = () => {
+        this.removeStageOverlay();
+        if (typeof onRestart === 'function') onRestart();
+      };
+    }
+
+    // Keyboard handling while overlay is active
+    this._stageOverlayKeyHandler = (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.removeStageOverlay();
+        if (typeof onRestart === 'function') onRestart();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isReviewing) {
+          setReviewMode(false);
+        } else {
+          this.removeStageOverlay();
+          this.switchView('index');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', this._stageOverlayKeyHandler, true);
+
+    return ov;
+  }
+
   switchView(viewName, moduleId = null) {
+    this.removeStageOverlay();
     if (this.activeModuleInstance && typeof this.activeModuleInstance.destroy === 'function') {
       this.activeModuleInstance.destroy();
       this.activeModuleInstance = null;
