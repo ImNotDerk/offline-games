@@ -3942,7 +3942,6 @@ class ModSolitaire {
       this.isWon = true;
       if (this.timerInterval) clearInterval(this.timerInterval);
       window.storageManager.setHighScore('solitaire', this.score);
-      window.audioController.playSfx(4);
       const el = document.getElementById('sol-score');
       if (el) el.textContent = `${this.score} (WON!)`;
 
