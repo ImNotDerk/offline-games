@@ -101,6 +101,18 @@
   background: var(--color-bg-hover);
 }
 
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.sudoku-cell.cell-error {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  animation: error-shake 0.3s ease-in-out;
+}
+
 .sudoku-cell.border-r {
   border-right: 2px solid var(--color-border-strong) !important;
 }
@@ -261,7 +273,52 @@
   max-width: 100%;
   padding: 4px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ms-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  width: 100%;
+  max-width: 580px;
+  box-sizing: border-box;
+}
+
+.ms-banner.detonated {
+  background: var(--color-bg-surface);
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+  animation: banner-pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes banner-pulse {
+  0% { border-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.2); }
+  100% { border-color: #f87171; box-shadow: 0 0 14px rgba(239, 68, 68, 0.45); }
+}
+
+[data-theme="gameboy"] .ms-banner.detonated {
+  background: #8bac0f;
+  border: 2px solid #0f380f;
+  color: #0f380f;
+  box-shadow: none;
+  animation: none;
+}
+
+[data-theme="amber"] .ms-banner.detonated {
+  background: #1e1b0c;
+  border: 2px solid #fb8500;
+  color: #ffb703;
+  box-shadow: 0 0 10px rgba(251, 133, 0, 0.3);
 }
 
 .ms-grid {
@@ -285,6 +342,7 @@
   justify-content: center;
   cursor: pointer;
   padding: 0;
+  line-height: 1;
 }
 
 .ms-cell:hover:not(.revealed) {
@@ -297,17 +355,62 @@
 }
 
 .ms-cell.mine {
-  background: #dc2626;
-  color: #ffffff;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
 }
 
 .ms-cell.exploded {
-  background: #991b1b;
-  color: #ffffff;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  animation: mine-flash 0.8s infinite ease-in-out;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes mine-flash {
+  0%, 100% {
+    box-shadow: inset 0 0 0 2px #ff4444, 0 0 8px rgba(255, 68, 68, 0.8);
+    background-color: #dc2626;
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px #ffffff, 0 0 3px rgba(255, 68, 68, 0.4);
+    background-color: #991b1b;
+  }
+}
+
+[data-theme="gameboy"] .ms-cell.mine {
+  background: #93b40e;
+  color: #0f380f;
+}
+
+[data-theme="gameboy"] .ms-cell.exploded {
+  background: #0f380f !important;
+  color: #9bbc0f !important;
+  outline: 2px solid #0f380f;
+  animation: none;
+}
+
+[data-theme="amber"] .ms-cell.mine {
+  background: #1e1b0c;
+  color: #ffb703;
+}
+
+[data-theme="amber"] .ms-cell.exploded {
+  background: #fb8500 !important;
+  color: #050505 !important;
 }
 
 .ms-cell.flagged {
   color: var(--color-accent);
+}
+
+.ms-cell.false-flag {
+  color: #ef4444;
+}
+
+.ms-icon {
+  display: block;
+  pointer-events: none;
 }
 
 .ms-cell.num-1 { color: #2563eb; }
@@ -318,6 +421,34 @@
 .ms-cell.num-6 { color: #0d9488; }
 .ms-cell.num-7 { color: #0284c7; }
 .ms-cell.num-8 { color: #64748b; }
+
+[data-theme="gameboy"] .ms-cell.num-1,
+[data-theme="gameboy"] .ms-cell.num-2,
+[data-theme="gameboy"] .ms-cell.num-3,
+[data-theme="gameboy"] .ms-cell.num-4,
+[data-theme="gameboy"] .ms-cell.num-5,
+[data-theme="gameboy"] .ms-cell.num-6,
+[data-theme="gameboy"] .ms-cell.num-7,
+[data-theme="gameboy"] .ms-cell.num-8 {
+  color: #0f380f;
+}
+
+[data-theme="amber"] .ms-cell.num-1,
+[data-theme="amber"] .ms-cell.num-2,
+[data-theme="amber"] .ms-cell.num-3,
+[data-theme="amber"] .ms-cell.num-4,
+[data-theme="amber"] .ms-cell.num-5,
+[data-theme="amber"] .ms-cell.num-6,
+[data-theme="amber"] .ms-cell.num-7,
+[data-theme="amber"] .ms-cell.num-8 {
+  color: #ffb703;
+}
+
+.btn-ctrl.active {
+  background: var(--color-bg-hover);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
 
 /* ==================== TETRIS ==================== */
 .tetris-stage {

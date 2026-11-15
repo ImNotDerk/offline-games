@@ -2023,6 +2023,7 @@ class ModSudoku {
     this.selected = { r: 0, c: 0 };
     this.diff = 0; // 0: Easy, 1: Medium, 2: Hard
     this.notesMode = false;
+    this.unlimitedErrors = false;
     this.timer = 0;
     this.timerInt = null;
     this.cells = [];
@@ -2030,7 +2031,7 @@ class ModSudoku {
 
   mount(mountEl, statsEl, actionsEl, kbdEl) {
     statsEl.innerHTML = `
-      <div class="stat-chip"><span class="stat-k">MISTAKES</span><span class="stat-v" id="sdk-mistakes">0/3</span></div>
+      <div class="stat-chip"><span class="stat-k">MISTAKES</span><span class="stat-v" id="sdk-mistakes">${this.unlimitedErrors ? '0/∞' : '0/3'}</span></div>
       <div class="stat-chip"><span class="stat-k">TIME</span><span class="stat-v" id="sdk-time">00:00</span></div>
     `;
 
@@ -2041,13 +2042,14 @@ class ModSudoku {
         <option value="1">MEDIUM</option>
         <option value="2">HARD</option>
       </select>
+      <button class="btn-ctrl${this.unlimitedErrors ? ' active' : ''}" id="sdk-btn-errors">[L] ERRORS: ${this.unlimitedErrors ? '∞' : '3'}</button>
       <button class="btn-ctrl" id="sdk-btn-notes">[N] NOTES: OFF</button>
       <button class="btn-ctrl" id="sdk-btn-hint">[H] HINT</button>
       <button class="btn-ctrl btn-primary" id="sdk-btn-new">[R] NEW</button>
     `;
 
     kbdEl.innerHTML = `
-      <span>CONTROLS: <span class="kbd-shortcut">&larr; &uarr; &rarr; &darr;</span> NAVIGATE | <span class="kbd-shortcut">1-9</span> ENTER | <span class="kbd-shortcut">BACKSPACE</span> CLEAR | <span class="kbd-shortcut">N</span> NOTES | <span class="kbd-shortcut">H</span> HINT</span>
+      <span>CONTROLS: <span class="kbd-shortcut">&larr; &uarr; &rarr; &darr;</span> NAVIGATE | <span class="kbd-shortcut">1-9</span> ENTER | <span class="kbd-shortcut">BACKSPACE</span> CLEAR | <span class="kbd-shortcut">L</span> ERRORS | <span class="kbd-shortcut">N</span> NOTES | <span class="kbd-shortcut">H</span> HINT</span>
     `;
 
     const container = document.createElement('div');
@@ -2097,6 +2099,17 @@ class ModSudoku {
       this.newGame();
     };
 
+    const errorsBtn = document.getElementById('sdk-btn-errors');
+    if (errorsBtn) {
+      errorsBtn.onclick = () => {
+        this.unlimitedErrors = !this.unlimitedErrors;
+        errorsBtn.textContent = `[L] ERRORS: ${this.unlimitedErrors ? '∞' : '3'}`;
+        errorsBtn.classList.toggle('active', this.unlimitedErrors);
+        window.wasmBridge.call('sudoku_set_unlimited_mistakes', this.unlimitedErrors ? 1 : 0);
+        this.syncBoard();
+      };
+    }
+
     const notesBtn = document.getElementById('sdk-btn-notes');
     notesBtn.onclick = () => {
       this.notesMode = !this.notesMode;
@@ -2132,6 +2145,10 @@ class ModSudoku {
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault();
         this.inputNumber(0);
+      } else if (e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        const b = document.getElementById('sdk-btn-errors');
+        if (b) b.click();
       } else if (e.key.toLowerCase() === 'n') {
         e.preventDefault();
         notesBtn.click();
@@ -2149,8 +2166,12 @@ class ModSudoku {
   }
 
   newGame() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     const seed = BigInt(Math.floor(Math.random() * 1000000000));
     window.wasmBridge.call('sudoku_generate', this.diff, seed);
+    window.wasmBridge.call('sudoku_set_unlimited_mistakes', this.unlimitedErrors ? 1 : 0);
     this.app.updateTelemetry();
     this.selected = { r: 0, c: 0 };
     this.startTimer();
@@ -2182,6 +2203,18 @@ class ModSudoku {
         if (n > 0) window.audioController.playSfx(4);
       } else if (n > 0) {
         window.audioController.playSfx(6);
+        const cellIdx = r * 9 + c;
+        const cellEl = this.cells[cellIdx];
+        if (cellEl) {
+          if (cellEl._errTimeout) clearTimeout(cellEl._errTimeout);
+          cellEl.classList.remove('cell-error');
+          void cellEl.offsetWidth;
+          cellEl.classList.add('cell-error');
+          cellEl._errTimeout = setTimeout(() => {
+            cellEl.classList.remove('cell-error');
+            cellEl._errTimeout = null;
+          }, 400);
+        }
       }
     }
     this.app.updateTelemetry();
@@ -2193,12 +2226,49 @@ class ModSudoku {
 
     if (isWon) {
       if (this.timerInt) clearInterval(this.timerInt);
-      window.audioController.playSfx(8);
-      this.showOverlay('SOLVED', `Time: ${document.getElementById('sdk-time').textContent}`, () => this.newGame());
+      const timeEl = document.getElementById('sdk-time');
+      const timeStr = timeEl ? timeEl.textContent : '00:00';
+      const mistakes = window.wasmBridge.call('sudoku_get_mistakes');
+      const diffNames = ['EASY', 'MEDIUM', 'HARD'];
+      const diffStr = diffNames[this.diff] || 'EASY';
+
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        this.app.showStageOverlay(
+          'SUDOKU SOLVED',
+          'Grid successfully completed!',
+          [
+            { label: 'DIFFICULTY', val: diffStr },
+            { label: 'TIME', val: timeStr },
+            { label: 'MISTAKES', val: this.unlimitedErrors ? `${mistakes} (UNLIMITED)` : `${mistakes}/3` }
+          ],
+          () => this.newGame(),
+          { allowReview: true }
+        );
+      } else {
+        this.showOverlay('SOLVED', `Time: ${timeStr}`, () => this.newGame());
+      }
     } else if (isOver) {
       if (this.timerInt) clearInterval(this.timerInt);
-      window.audioController.playSfx(7);
-      this.showOverlay('GAME OVER', '3 Mistakes Made', () => this.newGame());
+      const timeEl = document.getElementById('sdk-time');
+      const timeStr = timeEl ? timeEl.textContent : '00:00';
+      const diffNames = ['EASY', 'MEDIUM', 'HARD'];
+      const diffStr = diffNames[this.diff] || 'EASY';
+
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        this.app.showStageOverlay(
+          'SUDOKU FAILED',
+          'Mistake limit reached (3/3).',
+          [
+            { label: 'DIFFICULTY', val: diffStr },
+            { label: 'TIME', val: timeStr },
+            { label: 'MISTAKES', val: '3/3' }
+          ],
+          () => this.newGame(),
+          { isGameOver: true, allowReview: true }
+        );
+      } else {
+        this.showOverlay('GAME OVER', '3 Mistakes Made', () => this.newGame());
+      }
     }
   }
 
@@ -2218,7 +2288,7 @@ class ModSudoku {
   syncBoard() {
     const mistakes = window.wasmBridge.call('sudoku_get_mistakes');
     const mEl = document.getElementById('sdk-mistakes');
-    if (mEl) mEl.textContent = `${mistakes}/3`;
+    if (mEl) mEl.textContent = this.unlimitedErrors ? `${mistakes}/∞` : `${mistakes}/3`;
 
     const bPtr = window.wasmBridge.call('sudoku_get_board_ptr');
     const iPtr = window.wasmBridge.call('sudoku_get_initial_ptr');
@@ -2303,6 +2373,9 @@ class ModSudoku {
   destroy() {
     if (this.timerInt) clearInterval(this.timerInt);
     if (this.keyHandler) window.removeEventListener('keydown', this.keyHandler);
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
   }
 }
 
@@ -2892,6 +2965,10 @@ class ModTetris {
 // =========================================================================
 // MODULE: MINESWEEPER (Bit-Packed WASM Engine)
 // =========================================================================
+const MS_FLAG_SVG = `<svg class="ms-icon ms-icon-flag" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M5 2h8l-2.5 3.5L13 9H5V2z"/><rect x="3" y="1" width="2" height="13"/><rect x="1" y="13" width="8" height="2"/></svg>`;
+
+const MS_MINE_SVG = `<svg class="ms-icon ms-icon-mine" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><rect x="7" y="1" width="2" height="14"/><rect x="1" y="7" width="14" height="2"/><rect x="4" y="4" width="8" height="8" rx="1"/><polygon points="2,3 3,2 5,4 4,5"/><polygon points="14,3 13,2 11,4 12,5"/><polygon points="2,13 3,14 5,12 4,11"/><polygon points="14,13 13,14 11,12 12,11"/><circle cx="6" cy="6" r="1.2" fill="var(--color-bg-base, #ffffff)"/></svg>`;
+
 class ModMinesweeper {
   constructor(app) {
     this.app = app;
@@ -2927,9 +3004,13 @@ class ModMinesweeper {
     const container = document.createElement('div');
     container.className = 'ms-container';
 
+    const bannerContainer = document.createElement('div');
+    bannerContainer.id = 'ms-banner-container';
+
     const grid = document.createElement('div');
     grid.className = 'ms-grid';
     grid.id = 'ms-grid-el';
+    container.appendChild(bannerContainer);
     container.appendChild(grid);
     mountEl.appendChild(container);
 
@@ -2968,6 +3049,12 @@ class ModMinesweeper {
     const tEl = document.getElementById('ms-timer');
     if (tEl) tEl.textContent = '0';
 
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
+    const bContainer = document.getElementById('ms-banner-container');
+    if (bContainer) bContainer.innerHTML = '';
+
     const seed = BigInt(Math.floor(Math.random() * 1000000000));
     window.wasmBridge.call('ms_reset', this.diff, seed);
     this.app.updateTelemetry();
@@ -3002,6 +3089,8 @@ class ModMinesweeper {
         const btn = document.createElement('button');
         btn.className = 'ms-cell';
         btn.onclick = () => {
+          const currentState = window.wasmBridge.call('ms_get_state');
+          if (currentState === 2 || currentState === 3) return;
           if (this.timer === 0) this.startTimer();
           if (this.flagMode) {
             window.wasmBridge.call('ms_toggle_flag', r, c);
@@ -3017,6 +3106,8 @@ class ModMinesweeper {
 
         btn.oncontextmenu = (e) => {
           e.preventDefault();
+          const currentState = window.wasmBridge.call('ms_get_state');
+          if (currentState === 2 || currentState === 3) return;
           if (this.timer === 0) this.startTimer();
           window.wasmBridge.call('ms_toggle_flag', r, c);
           window.audioController.playSfx(2);
@@ -3025,6 +3116,8 @@ class ModMinesweeper {
         };
 
         btn.ondblclick = () => {
+          const currentState = window.wasmBridge.call('ms_get_state');
+          if (currentState === 2 || currentState === 3) return;
           window.wasmBridge.call('ms_chord', r, c);
           this.app.updateTelemetry();
           this.sync();
@@ -3062,31 +3155,69 @@ class ModMinesweeper {
       const count = (b >> 4) & 0x0F;
 
       btn.className = 'ms-cell';
-      btn.textContent = '';
+      btn.innerHTML = '';
 
       if (isRevealed) {
         btn.classList.add('revealed');
         if (isMine) {
           btn.classList.add(isExploded ? 'exploded' : 'mine');
-          btn.textContent = '*';
+          btn.innerHTML = MS_MINE_SVG;
         } else if (count > 0) {
           btn.classList.add(`num-${count}`);
           btn.textContent = count;
         }
       } else if (isFlagged) {
         btn.classList.add('flagged');
-        btn.textContent = 'P';
+        if (state === 3 && !isMine) {
+          btn.classList.add('false-flag');
+        }
+        btn.innerHTML = MS_FLAG_SVG;
       }
     }
 
     if (state === 2) {
       if (this.timerInt) clearInterval(this.timerInt);
-      window.audioController.playSfx(8);
-      this.showOverlay('VICTORY', `Cleared in ${this.timer} seconds!`, () => this.resetGame());
+      const bContainer = document.getElementById('ms-banner-container');
+      if (bContainer) bContainer.innerHTML = '';
+
+      const diffLabels = ['EASY (9×9)', 'MEDIUM (16×16)', 'HARD (30×16)'];
+      const diffLabel = diffLabels[this.diff] || 'CUSTOM';
+
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        this.app.showStageOverlay(
+          'MINESWEEPER CLEARED',
+          'Minefield successfully cleared!',
+          [
+            { label: 'DIFFICULTY', val: diffLabel },
+            { label: 'MINES', val: mCount },
+            { label: 'TIME', val: `${this.timer}s` }
+          ],
+          () => this.resetGame(),
+          { allowReview: true }
+        );
+      } else {
+        this.showOverlay('VICTORY', `Cleared in ${this.timer} seconds!`, () => this.resetGame());
+      }
     } else if (state === 3) {
       if (this.timerInt) clearInterval(this.timerInt);
-      window.audioController.playSfx(7);
-      this.showOverlay('DETONATED', 'Mine field failed.', () => this.resetGame());
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(7);
+      }
+
+      // Non-blocking banner: keep field 100% visible and unobscured
+      const bContainer = document.getElementById('ms-banner-container');
+      if (bContainer && !document.getElementById('ms-retry-btn')) {
+        bContainer.innerHTML = `
+          <div class="ms-banner detonated">
+            <span>★ MINE DETONATED! REVIEW FIELD OR PRESS [R] TO RETRY ★</span>
+            <button class="stage-btn btn-primary" id="ms-retry-btn">[R] RETRY</button>
+          </div>
+        `;
+        const retryBtn = document.getElementById('ms-retry-btn');
+        if (retryBtn) {
+          retryBtn.onclick = () => this.resetGame();
+        }
+      }
     }
   }
 
@@ -3115,6 +3246,9 @@ class ModMinesweeper {
   destroy() {
     if (this.timerInt) clearInterval(this.timerInt);
     if (this.keyHandler) window.removeEventListener('keydown', this.keyHandler);
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
   }
 }
 
