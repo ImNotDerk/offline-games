@@ -26,7 +26,7 @@ Designed specifically for low-specification machines and distraction-free offlin
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                          USER INTERFACE LAYER                          │
-│   Utilitarian Monospace Typography • CSS Grid • 0 Emojis • Light/Dark  │
+│ 4 Retro Themes (Arcade/GB/NES/Amber) • CRT Scanlines • 3D Beveled UI   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ DOM Events (Pointer / Keyboard)
                                     ▼
@@ -46,6 +46,7 @@ Designed specifically for low-specification machines and distraction-free offlin
 
 ### 1. 64-Bit Bitboard State Machine (2048)
 - The entire 4×4 grid is compressed into a single 64-bit unsigned integer (`u64`), where each tile occupies exactly 4 bits representing power-of-two exponents ($2^1$ to $2^{15}$).
+- Zero-allocation snapshot undo buffer allows reverting moves via `[U] UNDO` button and `U` key.
 - Row shifts and tile merges are evaluated using bitwise shifts and bitmask extractions with zero allocations.
 - Column operations are computed in $O(1)$ via bitwise matrix transposition before and after row merges.
 
@@ -53,11 +54,13 @@ Designed specifically for low-specification machines and distraction-free offlin
 - Tracks candidate elimination across 9 rows, 9 columns, and 9 3×3 boxes using 9-bit bitmask integers (`u16`).
 - Employs a **Minimum Remaining Values (MRV)** heuristic backtracking solver: computes candidate counts via hardware-accelerated population counts (`count_ones()`) to prioritize most-constrained cells first.
 - Generator guarantees a **strictly unique solution** by verifying branch counts during digging phases.
+- Includes error limits toggle (`ERRORS: 3` vs `ERRORS: ∞` unlimited casual play) and visual error shake feedback.
 
 ### 3. Bit-Packed Minesweeper Engine
 - Grid cells are packed into individual bytes (`u8`), encoding mine presence (bit 0), revealed state (bit 1), flagged state (bit 2), and adjacent mine counts (bits 4–7).
 - First-click safety is guaranteed by dynamically seeding mines only after the user's initial interaction, ensuring the starting tile and all 8 neighbors are always clear.
 - Zero-allocation BFS flood-fill queue uses a static array buffer on the Rust stack.
+- Uses theme-adaptive retro pixel SVG badges for flags and mines; defeat state exposes entire minefield with non-blocking retry banner for unobscured board inspection.
 
 ### 4. Guideline-Compliant Tetris Engine
 - Compact 200-byte matrix (`[u8; 200]`) tracking piece lockouts and line clears.
@@ -65,7 +68,7 @@ Designed specifically for low-specification machines and distraction-free offlin
 - Includes a 7-bag randomizer, lock delay timer, hold buffer, and instantaneous ghost piece projection.
 
 ### 5. Binary-Search Wordle Engine
-- Sorted 150-word 5-letter ASCII dictionary with $O(\log N)$ binary search validation.
+- Sorted ~1,000-word 5-letter ASCII dictionary (including common starters like `SLATE`, `ROAST`, `AUDIO`, `CRANE`) with $O(\log N)$ binary search validation.
 - Dual-pass evaluation algorithm: first pass resolves exact matches (green) and tracks remaining letter frequencies; second pass resolves misplaced letters (yellow) without over-counting duplicates.
 
 ### 6. Procedural Audio DSP

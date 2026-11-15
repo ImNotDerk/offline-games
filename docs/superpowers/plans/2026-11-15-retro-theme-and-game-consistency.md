@@ -45,7 +45,7 @@
   - `sudoku_set_unlimited_mistakes(unlimited: bool)`
   - `wordle_is_valid(c0: u8, c1: u8, c2: u8, c3: u8, c4: u8) -> bool` (expanded vocabulary)
 
-- [ ] **Step 1: Write failing Rust unit tests for 2048 Undo, Sudoku unlimited errors, and Wordle expanded dictionary**
+- [x] **Step 1: Write failing Rust unit tests for 2048 Undo, Sudoku unlimited errors, and Wordle expanded dictionary**
 
 In `src/game2048.rs`:
 ```rust
@@ -93,19 +93,19 @@ fn test_wordle_expanded_common_words() {
 }
 ```
 
-- [ ] **Step 2: Run `cargo test` to verify tests fail**
+- [x] **Step 2: Run `cargo test` to verify tests fail**
 
 Run: `cargo test`
 Expected: Failures (unknown method `undo`, missing `unlimited_mistakes`, words not in dictionary).
 
-- [ ] **Step 3: Implement 2048 Undo in `src/game2048.rs`**
+- [x] **Step 3: Implement 2048 Undo in `src/game2048.rs`**
 
 Add snapshot fields `prev_board: u64`, `prev_score: u32`, `prev_moves: u32`, `can_undo: bool`.
 Before applying any valid move in `move_dir()`, record `self.prev_board = self.board`, `self.prev_score = self.score`, `self.prev_moves = self.moves`, `self.can_undo = true`.
 Implement `pub fn undo(&mut self) -> bool`:
 If `!self.can_undo`, return `false`. Revert `self.board = self.prev_board`, `self.score = self.prev_score`, `self.moves = self.prev_moves`, `self.can_undo = false`, `self.game_over = false`, `self.won = false`, return `true`.
 
-- [ ] **Step 4: Implement Sudoku Unlimited Mistakes in `src/sudoku.rs`**
+- [x] **Step 4: Implement Sudoku Unlimited Mistakes in `src/sudoku.rs`**
 
 Add `pub unlimited_mistakes: bool` to `Sudoku`. In `enter_number()`, update mistake handling:
 ```rust
@@ -116,11 +116,11 @@ if !self.unlimited_mistakes && self.mistakes >= 3 {
 ```
 Add `pub fn set_unlimited_mistakes(&mut self, unlimited: bool) { self.unlimited_mistakes = unlimited; }`.
 
-- [ ] **Step 5: Expand Wordle Dictionary in `src/wordle.rs`**
+- [x] **Step 5: Expand Wordle Dictionary in `src/wordle.rs`**
 
 Expand `DICTIONARY` from 150 words to a sorted list of common 5-letter English words (sorted alphabetically to maintain $O(\log N)$ binary search). Ensure `SLATE`, `ROAST`, `AUDIO`, `CRANE`, `LIGHT`, `STARE`, `RAISE` are included.
 
-- [ ] **Step 6: Export C-ABI functions in `src/lib.rs`**
+- [x] **Step 6: Export C-ABI functions in `src/lib.rs`**
 
 Export:
 ```rust
@@ -135,17 +135,17 @@ pub extern "C" fn sudoku_set_unlimited_mistakes(unlimited: bool) {
 }
 ```
 
-- [ ] **Step 7: Run `cargo test` to verify all tests pass**
+- [x] **Step 7: Run `cargo test` to verify all tests pass**
 
 Run: `cargo test`
 Expected: PASS (all tests ok).
 
-- [ ] **Step 8: Recompile WASM and generate base64 fallback**
+- [x] **Step 8: Recompile WASM and generate base64 fallback**
 
 Run: `./build.sh`
 Expected: `wasm/zenith_core.wasm` compiled cleanly and `js/wasm_inline.js` generated.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/game2048.rs src/sudoku.rs src/wordle.rs src/lib.rs wasm/zenith_core.wasm js/wasm_inline.js
@@ -166,11 +166,11 @@ git commit -m "feat(core): add 2048 undo, sudoku unlimited errors, and expanded 
 - Consumes: CSS custom properties on `<html>`
 - Produces: `[data-theme="arcade|gameboy|nes|amber"]`, `body.scanlines-on`, 3D button classes
 
-- [ ] **Step 1: Delete orphaned `styles/games.css`**
+- [x] **Step 1: Delete orphaned `styles/games.css`**
 
 Run: `rm -f styles/games.css`
 
-- [ ] **Step 2: Add theme definitions and CRT scanline overlay in `styles/main.css`**
+- [x] **Step 2: Add theme definitions and CRT scanline overlay in `styles/main.css`**
 
 Implement CSS custom property matrices for:
 - `[data-theme="arcade"]` (Deep obsidian, neon magenta, cyan, arcade yellow)
@@ -181,7 +181,7 @@ Implement CSS custom property matrices for:
 Add `.scanlines-on::after` scanline overlay with pointer-events none.
 Add tactile 3D beveled button styles (`.stage-btn`, `.btn-ctrl`, `.keypad-digit-btn`, `.filter-chip`).
 
-- [ ] **Step 3: Update `index.html` top utility bar controls**
+- [x] **Step 3: Update `index.html` top utility bar controls**
 
 Replace old theme toggle with:
 ```html
@@ -189,19 +189,19 @@ Replace old theme toggle with:
 <button id="crt-toggle-btn" class="top-btn" title="Toggle CRT Scanline Overlay">CRT: ON</button>
 ```
 
-- [ ] **Step 4: Update Theme & CRT event handlers in `js/app.js`**
+- [x] **Step 4: Update Theme & CRT event handlers in `js/app.js`**
 
 In `App.prototype.setupTheme()`:
 Support carousel cycling: `arcade` → `gameboy` → `nes` → `amber` → `arcade`.
 Save preference to `localStorage.getItem('zenith_retro_theme')`.
 Add `App.prototype.setupCrt()` to toggle `body.classList.toggle('scanlines-on')` and persist in `localStorage.getItem('zenith_crt')`.
 
-- [ ] **Step 5: Verify theme cycling and scanlines in browser**
+- [x] **Step 5: Verify theme cycling and scanlines in browser**
 
 Test clicking `THEME: ...` button: verify attributes update to `arcade`, `gameboy`, `nes`, `amber`.
 Test clicking `CRT: ...` button: verify `scanlines-on` class toggles.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add styles/main.css index.html js/app.js
@@ -221,7 +221,7 @@ git commit -m "feat(ui): add 4-mode retro theme carousel, crt scanlines, and tac
 **Interfaces:**
 - Produces: `App.prototype.showStageOverlay(title, subtitle, stats, onRestart, options)`
 
-- [ ] **Step 1: Write CSS for `.stage-overlay` and `.retro-box` in `styles/main.css`**
+- [x] **Step 1: Write CSS for `.stage-overlay` and `.retro-box` in `styles/main.css`**
 
 Add retro arcade popup styling:
 - Deep beveled 3-pixel border with theme accent glow.
@@ -230,17 +230,17 @@ Add retro arcade popup styling:
 - Arcade action buttons `[R] PLAY AGAIN` and `[ESC] RETURN TO HUB`.
 - Support non-blocking / review banner mode (`.stage-overlay.banner-mode`).
 
-- [ ] **Step 2: Implement `App.prototype.showStageOverlay` in `js/app.js`**
+- [x] **Step 2: Implement `App.prototype.showStageOverlay` in `js/app.js`**
 
 Implement standardized overlay method accepting `title`, `subtitle`, `stats`, `onRestart`, and `options = { allowReview: false }`.
 When `allowReview` is true, include a `[EYE] REVIEW BOARD` button that hides the modal box and displays a slim floating bar with `RE-OPEN OVERLAY`, allowing full board inspection.
 Trigger chiptune victory/game-over sound effect on display.
 
-- [ ] **Step 3: Verify overlay rendering**
+- [x] **Step 3: Verify overlay rendering**
 
 Call `app.showStageOverlay('TEST VICTORY', 'Stage cleared', [{label: 'SCORE', val: '100'}], () => {})` in console and verify visual appearance, keybinds, and dismissal.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add styles/main.css styles/modules.css js/app.js
@@ -258,7 +258,7 @@ git commit -m "feat(ui): implement unified retro stage overlay with review board
 **Interfaces:**
 - Consumes: `App.prototype.showStageOverlay`
 
-- [ ] **Step 1: Fix empty tableau column click delegation in `ModSolitaire`**
+- [x] **Step 1: Fix empty tableau column click delegation in `ModSolitaire`**
 
 In `ModSolitaire.prototype.render()`:
 Ensure empty columns render:
@@ -275,7 +275,7 @@ const tableauIdx = el.getAttribute('data-tableau') !== null
   : (el.closest('[data-tableau]') ? parseInt(el.closest('[data-tableau]').getAttribute('data-tableau'), 10) : null);
 ```
 
-- [ ] **Step 2: Add Victory Stage Overlay to Solitaire**
+- [x] **Step 2: Add Victory Stage Overlay to Solitaire**
 
 In `ModSolitaire.prototype.checkWin()`:
 When all foundations reach 13:
@@ -292,16 +292,16 @@ this.app.showStageOverlay(
 );
 ```
 
-- [ ] **Step 3: Add retro playing card styles in `styles/modules.css`**
+- [x] **Step 3: Add retro playing card styles in `styles/modules.css`**
 
 Add crisp pixel styling for cards, suits (`♣`, `♦`, `♥`, `♠`), red/black high-contrast colors, and selected card elevation.
 
-- [ ] **Step 4: Verify Solitaire King placement & auto-complete**
+- [x] **Step 4: Verify Solitaire King placement & auto-complete**
 
 Test clicking a King and clicking an empty tableau slot: confirm King moves cleanly.
 Test clearing cards to foundations: confirm victory overlay appears.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add js/app.js styles/modules.css
@@ -319,7 +319,7 @@ git commit -m "fix(solitaire): resolve empty tableau king placement bug and add 
 **Interfaces:**
 - Consumes: `sudoku_set_unlimited_mistakes` from WASM bridge
 
-- [ ] **Step 1: Add Error Limit Toggle & Visual Shake Feedback to Sudoku**
+- [x] **Step 1: Add Error Limit Toggle & Visual Shake Feedback to Sudoku**
 
 In `ModSudoku.mount()`:
 Add mistake limit toggle button:
@@ -339,11 +339,11 @@ When an incorrect number is entered in `inputNumber()`, add `.cell-error` class 
 }
 ```
 
-- [ ] **Step 2: Update Sudoku victory/game over to use `showStageOverlay`**
+- [x] **Step 2: Update Sudoku victory/game over to use `showStageOverlay`**
 
 Replace old inline overlay with `this.app.showStageOverlay('SUDOKU SOLVED', ...)`.
 
-- [ ] **Step 3: Update Minesweeper with SVG pixel badges & non-blocking defeat banner**
+- [x] **Step 3: Update Minesweeper with SVG pixel badges & non-blocking defeat banner**
 
 In `ModMinesweeper.prototype.sync()`:
 Replace `'P'` and `'*'` with inline theme-colored SVGs for retro flags and mines.
@@ -360,12 +360,12 @@ When detonated (`state === 3`):
   ```
 - Wire `[R] RETRY` button and key to `this.resetGame()`.
 
-- [ ] **Step 4: Verify Sudoku unlimited mistakes and Minesweeper board inspection**
+- [x] **Step 4: Verify Sudoku unlimited mistakes and Minesweeper board inspection**
 
 Test Sudoku: enter 4+ wrong numbers in unlimited mode, verify no game-over kick.
 Test Minesweeper: click a mine, verify all bombs reveal, the board is completely visible and unobscured, and retry works.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add js/app.js styles/modules.css
@@ -383,30 +383,30 @@ git commit -m "feat(sudoku,minesweeper): add sudoku error toggle and minesweeper
 **Interfaces:**
 - Consumes: `g2048_undo` from WASM bridge, `App.prototype.showStageOverlay`
 
-- [ ] **Step 1: Wire 2048 Undo in `Mod2048`**
+- [x] **Step 1: Wire 2048 Undo in `Mod2048`**
 
 In `Mod2048.mount()`:
 Add `<button class="btn-ctrl" id="g2048-btn-undo">[U] UNDO</button>`.
 In `keyHandler`: bind `'u'` / `'U'` to call `window.wasmBridge.call('g2048_undo')`, play SFX 2, and sync.
 Update `sync()` to use `this.app.showStageOverlay('GAME OVER', ...)`.
 
-- [ ] **Step 2: Add Stage Overlays to Connect 4 & Tic-Tac-Toe**
+- [x] **Step 2: Add Stage Overlays to Connect 4 & Tic-Tac-Toe**
 
 In `ModConnect4`:
 In `handleWin(winner)` and `handleDraw()`: call `this.app.showStageOverlay(winner === 1 ? 'VICTORY' : 'DEFEAT', ...)`.
 In `ModTicTacToe`:
 In `handleWin(winner)` and `handleDraw()`: call `this.app.showStageOverlay(winner === 'X' ? 'VICTORY' : 'DEFEAT', ...)`.
 
-- [ ] **Step 3: Update Tic-Tac-Toe Keyboard Controls for Laptops**
+- [x] **Step 3: Update Tic-Tac-Toe Keyboard Controls for Laptops**
 
 Support standard top row number keys `1-9` (`1` = A1, `2` = B1, `3` = C1, `4` = A2, etc.) as well as desktop Numpad.
 
-- [ ] **Step 4: Verify 2048 undo, Connect 4, and Tic-Tac-Toe match completions**
+- [x] **Step 4: Verify 2048 undo, Connect 4, and Tic-Tac-Toe match completions**
 
 Test sliding in 2048 and pressing `U`: board returns to previous state.
 Test winning Connect 4 and Tic-Tac-Toe: verify stage overlays appear with `[R] PLAY AGAIN`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add js/app.js styles/modules.css
@@ -420,17 +420,17 @@ git commit -m "feat(games): wire 2048 undo, connect 4/tic-tac-toe stage overlays
 **Files:**
 - Test all games across `index.html`
 
-- [ ] **Step 1: Run Rust unit tests**
+- [x] **Step 1: Run Rust unit tests**
 
 Run: `cargo test`
 Expected: 16+ tests passing with 0 errors.
 
-- [ ] **Step 2: Run WASM build verification**
+- [x] **Step 2: Run WASM build verification**
 
 Run: `./build.sh`
 Expected: Build passes, binary is under 60 KB, and `js/wasm_inline.js` is fresh.
 
-- [ ] **Step 3: End-to-end theme & gameplay verification**
+- [x] **Step 3: End-to-end theme & gameplay verification**
 
 Verify:
 - All 4 themes cycle smoothly and apply to all 10 modules.
@@ -443,7 +443,7 @@ Verify:
 - Connect 4 & Tic-Tac-Toe victory overlays.
 - Offline `file://` double-click portability.
 
-- [ ] **Step 4: Final commit**
+- [x] **Step 4: Final commit**
 
 ```bash
 git commit -am "chore(release): complete retro themer and consistency overhaul"
