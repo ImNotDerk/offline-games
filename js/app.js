@@ -1665,7 +1665,9 @@ class App {
 
     // Trigger chiptune audio SFX: play SFX 8 (victory) or SFX 7 (game over) based on title/options
     let sfxId = 8;
-    if (options && options.sfx !== undefined) {
+    if (options && (options.sfx === false || options.sfx === null)) {
+      sfxId = null;
+    } else if (options && options.sfx !== undefined) {
       sfxId = options.sfx;
     } else if (options && (options.isGameOver || options.defeat || options.isWin === false)) {
       sfxId = 7;
@@ -1679,7 +1681,7 @@ class App {
         sfxId = 8;
       }
     }
-    if (window.audioController && typeof window.audioController.playSfx === 'function') {
+    if (sfxId !== null && window.audioController && typeof window.audioController.playSfx === 'function') {
       window.audioController.playSfx(sfxId);
     }
 
@@ -1728,8 +1730,8 @@ class App {
     const minibarHtml = (options && options.allowReview) ? `
       <div class="overlay-minibar">
         <span>★ MATCH OVER — REVIEWING BOARD ★</span>
-        <button class="stage-btn" id="stage-ov-btn-reopen">SHOW RESULTS</button>
-        <button class="stage-btn btn-primary" id="stage-ov-btn-restart-mini">[R] PLAY AGAIN</button>
+        <button class="stage-btn" id="stage-ov-btn-reopen">RE-OPEN OVERLAY</button>
+        ${onRestart ? '<button class="stage-btn btn-primary" id="stage-ov-btn-restart-mini">[R] PLAY AGAIN</button>' : ''}
       </div>
     ` : '';
 
@@ -1799,12 +1801,13 @@ class App {
 
     // Keyboard handling while overlay is active
     this._stageOverlayKeyHandler = (e) => {
-      if (e.key === 'r' || e.key === 'R') {
+      if ((e.key === 'r' || e.key === 'R') && !e.metaKey && !e.ctrlKey && !e.altKey && typeof onRestart === 'function') {
         e.preventDefault();
         e.stopPropagation();
         this.removeStageOverlay();
-        if (typeof onRestart === 'function') onRestart();
+        onRestart();
       } else if (e.key === 'Escape') {
+        if (this.tutDialog && this.tutDialog.open) return;
         e.preventDefault();
         e.stopPropagation();
         if (isReviewing) {
