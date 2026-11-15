@@ -61,6 +61,11 @@ pub extern "C" fn g2048_is_won() -> bool {
 }
 
 #[no_mangle]
+pub extern "C" fn g2048_undo() -> bool {
+    unsafe { G2048.undo() }
+}
+
+#[no_mangle]
 pub extern "C" fn g2048_get_board_ptr() -> *const u32 {
     unsafe {
         G2048.export_board(&mut G2048_EXPORT_BUF);
@@ -124,6 +129,11 @@ pub extern "C" fn sudoku_is_won() -> bool {
 #[no_mangle]
 pub extern "C" fn sudoku_is_game_over() -> bool {
     unsafe { SUDOKU.is_game_over }
+}
+
+#[no_mangle]
+pub extern "C" fn sudoku_set_unlimited_mistakes(unlimited: bool) {
+    unsafe { SUDOKU.set_unlimited_mistakes(unlimited) };
 }
 
 // --- MINESWEEPER EXPORTS ---

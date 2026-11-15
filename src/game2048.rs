@@ -10,6 +10,10 @@ pub struct Game2048 {
     pub moves: u32,
     pub game_over: bool,
     pub won: bool,
+    pub prev_board: u64,
+    pub prev_score: u32,
+    pub prev_moves: u32,
+    pub can_undo: bool,
     rng: Rng,
 }
 
@@ -21,6 +25,10 @@ impl Game2048 {
             moves: 0,
             game_over: false,
             won: false,
+            prev_board: 0,
+            prev_score: 0,
+            prev_moves: 0,
+            can_undo: false,
             rng: Rng::new(seed),
         }
     }
@@ -31,6 +39,10 @@ impl Game2048 {
         self.moves = 0;
         self.game_over = false;
         self.won = false;
+        self.prev_board = 0;
+        self.prev_score = 0;
+        self.prev_moves = 0;
+        self.can_undo = false;
         self.rng.seed(seed);
         self.spawn_random_tile();
         self.spawn_random_tile();
@@ -198,6 +210,11 @@ impl Game2048 {
         }
 
         if self.board != old_board {
+            self.prev_board = old_board;
+            self.prev_score = self.score;
+            self.prev_moves = self.moves;
+            self.can_undo = true;
+
             self.score += gained_score;
             self.moves += 1;
             self.spawn_random_tile();
@@ -219,6 +236,25 @@ impl Game2048 {
         } else {
             false
         }
+    }
+
+    pub fn undo(&mut self) -> bool {
+        if !self.can_undo {
+            return false;
+        }
+        self.board = self.prev_board;
+        self.score = self.prev_score;
+        self.moves = self.prev_moves;
+        self.can_undo = false;
+        self.game_over = false;
+        self.won = false;
+        for i in 0..16 {
+            if ((self.board >> (i * 4)) & 0xF) >= 11 {
+                self.won = true;
+                break;
+            }
+        }
+        true
     }
 
     pub fn can_move(&self) -> bool {
@@ -304,5 +340,20 @@ mod tests {
             }
         }
         assert_eq!(tiles, 2);
+    }
+
+    #[test]
+    fn test_2048_undo() {
+        let mut game = Game2048::new(42);
+        game.reset(42);
+        let initial_board = game.board;
+        let initial_score = game.score;
+        // Force a move
+        if game.move_dir(0) || game.move_dir(1) || game.move_dir(2) || game.move_dir(3) {
+            assert!(game.undo());
+            assert_eq!(game.board, initial_board);
+            assert_eq!(game.score, initial_score);
+            assert!(!game.undo()); // Second undo without move should fail
+        }
     }
 }

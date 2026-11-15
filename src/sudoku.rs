@@ -12,6 +12,7 @@ pub struct Sudoku {
     pub mistakes: u8,
     pub is_won: bool,
     pub is_game_over: bool,
+    pub unlimited_mistakes: bool,
     rng: Rng,
 }
 
@@ -25,6 +26,7 @@ impl Sudoku {
             mistakes: 0,
             is_won: false,
             is_game_over: false,
+            unlimited_mistakes: false,
             rng: Rng::new(seed),
         }
     }
@@ -246,11 +248,15 @@ impl Sudoku {
             true
         } else {
             self.mistakes += 1;
-            if self.mistakes >= 3 {
+            if !self.unlimited_mistakes && self.mistakes >= 3 {
                 self.is_game_over = true;
             }
             false
         }
+    }
+
+    pub fn set_unlimited_mistakes(&mut self, unlimited: bool) {
+        self.unlimited_mistakes = unlimited;
     }
 
     pub fn toggle_note(&mut self, r: usize, c: usize, num: u8) {
@@ -326,5 +332,25 @@ mod tests {
             assert!(s.enter_number(r, c, val));
             assert_eq!(s.board[r * 9 + c], val);
         }
+    }
+
+    #[test]
+    fn test_sudoku_unlimited_mistakes() {
+        let mut sdk = Sudoku::new(42);
+        sdk.generate(0, 42);
+        sdk.unlimited_mistakes = true;
+        sdk.mistakes = 2;
+        // Enter wrong digit
+        let (r, c) = if sdk.initial[0] == 0 {
+            (0, 0)
+        } else {
+            let idx = sdk.initial.iter().position(|&x| x == 0).unwrap();
+            (idx / 9, idx % 9)
+        };
+        let wrong = if sdk.solution[r * 9 + c] == 1 { 2 } else { 1 };
+        let ok = sdk.enter_number(r, c, wrong);
+        assert!(!ok);
+        assert_eq!(sdk.mistakes, 3);
+        assert!(!sdk.is_game_over); // Should NOT be game over when unlimited is active
     }
 }
