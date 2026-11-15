@@ -7,28 +7,43 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
 
-  /* Default theme: Arcade Neon */
+  /* Default theme & restful dark-slate outer UI palette */
   color-scheme: dark;
-  --color-bg-page: #0a0a14;
-  --color-bg-surface: #121224;
-  --color-bg-hover: #1c1c38;
-  --color-bg-base: #0a0a14;
-  --color-text-main: #f0f0ff;
-  --color-text-muted: #8080a8;
-  --color-border: #262648;
-  --color-border-strong: #ff007f;
+  --color-bg-page: #0b0f19;
+  --color-bg-base: #0b0f19;
+  --color-bg-surface: #111827;
+  --color-bg-card: #1f2937;
+  --color-bg-hover: #1f2937;
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #1e293b;
+  --color-border-strong: #334155;
   --color-accent: #00f5d4;
   --color-accent-alt: #ffbe0b;
 
-  --scrollbar-track: #0a0a14;
-  --scrollbar-thumb: #262648;
+  --scrollbar-track: #0b0f19;
+  --scrollbar-thumb: #334155;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+:root, body {
+  --color-bg-base: #0b0f19;
+  --color-bg-page: #0b0f19;
+  --color-bg-surface: #111827;
+  --color-bg-card: #1f2937;
+  --color-bg-hover: #1f2937;
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #1e293b;
+  --color-border-strong: #334155;
 }
 
 /* ==================== 4-MODE RETRO THEME ENGINE ==================== */
 
 /* Theme 1: Arcade Neon (Deep obsidian, neon magenta, cyan, arcade yellow) */
-[data-theme="arcade"] {
+.handheld-chassis[data-theme="arcade"],
+[data-theme="arcade"] .handheld-chassis,
+[data-theme="arcade"] .handheld-screen {
   color-scheme: dark;
   --color-bg-page: #0a0a14;
   --color-bg-surface: #121224;
@@ -45,7 +60,9 @@
 }
 
 /* Theme 2: Game Boy DMG (Authentic 4-shade olive green LCD matrix) */
-[data-theme="gameboy"] {
+.handheld-chassis[data-theme="gameboy"],
+[data-theme="gameboy"] .handheld-chassis,
+[data-theme="gameboy"] .handheld-screen {
   color-scheme: light;
   --color-bg-page: #8bac0f;
   --color-bg-surface: #9bbc0f;
@@ -62,7 +79,9 @@
 }
 
 /* Theme 3: NES 8-Bit (Famicom charcoal, crimson, cream) */
-[data-theme="nes"] {
+.handheld-chassis[data-theme="nes"],
+[data-theme="nes"] .handheld-chassis,
+[data-theme="nes"] .handheld-screen {
   color-scheme: dark;
   --color-bg-page: #202024;
   --color-bg-surface: #2b2b31;
@@ -79,7 +98,9 @@
 }
 
 /* Theme 4: Amber CRT Phosphor (Black, glowing amber, phosphor orange) */
-[data-theme="amber"] {
+.handheld-chassis[data-theme="amber"],
+[data-theme="amber"] .handheld-chassis,
+[data-theme="amber"] .handheld-screen {
   color-scheme: dark;
   --color-bg-page: #050505;
   --color-bg-surface: #0f0e08;
@@ -96,7 +117,9 @@
 }
 
 /* Fallback themes */
-[data-theme="dark"] {
+.handheld-chassis[data-theme="dark"],
+[data-theme="dark"] .handheld-chassis,
+[data-theme="dark"] .handheld-screen {
   color-scheme: dark;
   --color-bg-page: #0a0a14;
   --color-bg-surface: #121224;
@@ -112,7 +135,9 @@
   --scrollbar-thumb: #262648;
 }
 
-[data-theme="light"] {
+.handheld-chassis[data-theme="light"],
+[data-theme="light"] .handheld-chassis,
+[data-theme="light"] .handheld-screen {
   color-scheme: light;
   --color-bg-page: #8bac0f;
   --color-bg-surface: #9bbc0f;
@@ -129,18 +154,21 @@
 }
 
 /* ==================== CRT SCANLINES OVERLAY ==================== */
-.scanlines-on::after {
+.handheld-screen.scanlines-on::after {
   content: " ";
   display: block;
-  position: fixed;
+  position: absolute;
   inset: 0;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%,
-    rgba(0, 0, 0, 0.25) 50%
-  );
-  background-size: 100% 4px;
-  z-index: 9999;
   pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.28) 2px,
+    rgba(0, 0, 0, 0.28) 4px
+  );
+  z-index: 50;
+  border-radius: inherit;
 }
 
 * {
@@ -151,7 +179,7 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-bg-page);
+  background-color: var(--color-bg-base);
   color: var(--color-text-main);
   line-height: 1.45;
   min-height: 100vh;
@@ -484,7 +512,7 @@ body {
 }
 
 .index-card {
-  background: var(--color-bg-surface);
+  background: var(--color-bg-card, var(--color-bg-surface));
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1.25rem;
