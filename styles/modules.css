@@ -867,6 +867,34 @@
   to { transform: scale(1.05); }
 }
 
+[data-theme="gameboy"] .c4-slot.p1 {
+  background: #0f380f;
+  border-color: #0f380f;
+}
+
+[data-theme="gameboy"] .c4-slot.p2 {
+  background: #8bac0f;
+  border-color: #306230;
+}
+
+[data-theme="gameboy"] .c4-slot.winning {
+  box-shadow: 0 0 0 3px #0f380f;
+}
+
+[data-theme="amber"] .c4-slot.p1 {
+  background: #ffb703;
+  border-color: #fb8500;
+}
+
+[data-theme="amber"] .c4-slot.p2 {
+  background: #6b4000;
+  border-color: #b45309;
+}
+
+[data-theme="amber"] .c4-slot.winning {
+  box-shadow: 0 0 0 3px #fb8500;
+}
+
 /* ==================== TIC-TAC-TOE (TACTICS 3) ==================== */
 .ttt-container {
   width: 100%;
@@ -1030,6 +1058,22 @@
   border: 2px solid var(--color-accent);
   color: var(--color-accent);
   box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+[data-theme="gameboy"] .ttt-cell.x-mark {
+  color: #0f380f;
+}
+
+[data-theme="gameboy"] .ttt-cell.o-mark {
+  color: #306230;
+}
+
+[data-theme="amber"] .ttt-cell.x-mark {
+  color: #ffb703;
+}
+
+[data-theme="amber"] .ttt-cell.o-mark {
+  color: #fb8500;
 }
 
 .ttt-piece-badge {

@@ -1896,12 +1896,15 @@ class Mod2048 {
 
     actionsEl.innerHTML = `
       <button class="stage-btn" id="g2048-btn-tut">[?] RULES</button>
+      <button class="btn-ctrl" id="g2048-btn-undo">[U] UNDO</button>
       <button class="btn-ctrl btn-primary" id="g2048-btn-restart">[R] RESTART</button>
     `;
     document.getElementById('g2048-btn-tut').onclick = () => this.app.openTutorial('g2048');
+    document.getElementById('g2048-btn-undo').onclick = () => this.undo();
+    document.getElementById('g2048-btn-restart').onclick = () => this.restart();
 
     kbdEl.innerHTML = `
-      <span>CONTROLS: <span class="kbd-shortcut">&larr; &uarr; &rarr; &darr;</span> OR <span class="kbd-shortcut">WASD</span> | <span class="kbd-shortcut">R</span> RESTART</span>
+      <span>CONTROLS: <span class="kbd-shortcut">&larr; &uarr; &rarr; &darr;</span> OR <span class="kbd-shortcut">WASD</span> | <span class="kbd-shortcut">U</span> UNDO | <span class="kbd-shortcut">R</span> RESTART</span>
     `;
 
     const board = document.createElement('div');
@@ -1918,8 +1921,6 @@ class Mod2048 {
     }
     mountEl.appendChild(board);
 
-    document.getElementById('g2048-btn-restart').onclick = () => this.restart();
-
     this.keyHandler = (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(e.key)) {
         e.preventDefault();
@@ -1931,12 +1932,19 @@ class Mod2048 {
 
         if (dir !== -1) {
           const moved = window.wasmBridge.call('g2048_move', dir);
-          this.app.updateTelemetry();
+          if (this.app && typeof this.app.updateTelemetry === 'function') {
+            this.app.updateTelemetry();
+          }
           if (moved) {
-            window.audioController.playSfx(1);
+            if (window.audioController && typeof window.audioController.playSfx === 'function') {
+              window.audioController.playSfx(1);
+            }
             this.sync();
           }
         }
+      } else if (e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        this.undo();
       } else if (e.key.toLowerCase() === 'r') {
         e.preventDefault();
         this.restart();
@@ -1947,12 +1955,39 @@ class Mod2048 {
     this.restart();
   }
 
+  undo() {
+    const undone = window.wasmBridge.call('g2048_undo');
+    if (this.app && typeof this.app.updateTelemetry === 'function') {
+      this.app.updateTelemetry();
+    }
+    if (undone) {
+      if (this.app && typeof this.app.removeStageOverlay === 'function') {
+        this.app.removeStageOverlay();
+      }
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(2);
+      }
+      this.sync();
+    }
+  }
+
   restart() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     const seed = BigInt(Math.floor(Math.random() * 1000000000));
     window.wasmBridge.call('g2048_reset', seed);
-    this.app.updateTelemetry();
-    window.audioController.playSfx(0);
+    if (this.app && typeof this.app.updateTelemetry === 'function') {
+      this.app.updateTelemetry();
+    }
+    if (window.audioController && typeof window.audioController.playSfx === 'function') {
+      window.audioController.playSfx(0);
+    }
     this.sync();
+  }
+
+  resetGame() {
+    this.restart();
   }
 
   sync() {
@@ -1966,7 +2001,9 @@ class Mod2048 {
     if (sEl) sEl.textContent = score;
     if (mEl) mEl.textContent = moves;
 
-    window.storageManager.setHighScore('g2048', score);
+    if (window.storageManager && typeof window.storageManager.setHighScore === 'function') {
+      window.storageManager.setHighScore('g2048', score);
+    }
 
     // Zero-copy read of 16 u32 values from Rust linear memory
     const ptr = window.wasmBridge.call('g2048_get_board_ptr');
@@ -1980,10 +2017,30 @@ class Mod2048 {
     }
 
     if (isOver) {
-      window.audioController.playSfx(7);
-      this.showOverlay('GAME OVER', `Final Score: ${score}`, () => this.restart());
+      const best = (window.storageManager && typeof window.storageManager.getHighScore === 'function')
+        ? window.storageManager.getHighScore('g2048')
+        : this.bestScore;
+      if (this.app && typeof this.app.showStageOverlay === 'function') {
+        this.app.showStageOverlay(
+          'GAME OVER',
+          'No more moves available',
+          [
+            { label: 'SCORE', val: score },
+            { label: 'BEST', val: best }
+          ],
+          () => this.resetGame(),
+          { sfx: 7, allowReview: true }
+        );
+      } else {
+        if (window.audioController && typeof window.audioController.playSfx === 'function') {
+          window.audioController.playSfx(7);
+        }
+        this.showOverlay('GAME OVER', `Final Score: ${score}`, () => this.resetGame());
+      }
     } else if (isWon) {
-      window.audioController.playSfx(8);
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(8);
+      }
     }
   }
 
@@ -2011,6 +2068,9 @@ class Mod2048 {
 
   destroy() {
     if (this.keyHandler) window.removeEventListener('keydown', this.keyHandler);
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
   }
 }
 
@@ -3999,13 +4059,18 @@ class ModConnect4 {
   }
 
   initGame() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     this.grid = Array(this.rows).fill(null).map(() => Array(this.cols).fill(0));
     this.turn = 1;
     this.gameOver = false;
     this.winningCells = [];
     this.updateTurnLabel();
     this.render();
-    window.audioController.playSfx(0);
+    if (window.audioController && typeof window.audioController.playSfx === 'function') {
+      window.audioController.playSfx(0);
+    }
   }
 
   updateTurnLabel() {
@@ -4306,12 +4371,10 @@ class ModConnect4 {
     this.gameOver = true;
     if (winner === 1) {
       this.p1Wins++;
-      window.storageManager.set('c4_wins_p1', this.p1Wins);
-      window.audioController.playSfx(4);
+      if (window.storageManager) window.storageManager.set('c4_wins_p1', this.p1Wins);
     } else {
       this.p2Wins++;
-      window.storageManager.set('c4_wins_p2', this.p2Wins);
-      window.audioController.playSfx(3);
+      if (window.storageManager) window.storageManager.set('c4_wins_p2', this.p2Wins);
     }
     const p1El = document.getElementById('c4-p1-wins');
     const p2El = document.getElementById('c4-p2-wins');
@@ -4319,17 +4382,60 @@ class ModConnect4 {
     if (p2El) p2El.textContent = this.p2Wins;
     this.updateTurnLabel();
     this.render();
+
+    if (this.app && typeof this.app.showStageOverlay === 'function') {
+      const isP1 = winner === 1;
+      const title = isP1 ? 'VICTORY' : 'DEFEAT';
+      const subtitle = isP1
+        ? (this.mode === 'pvp' ? 'Player 1 connected 4!' : 'You connected 4!')
+        : (this.mode === 'pvp' ? 'Player 2 connected 4!' : 'Opponent connected 4');
+      this.app.showStageOverlay(
+        title,
+        subtitle,
+        [
+          { label: 'P1 WINS', val: this.p1Wins },
+          { label: 'P2 / AI', val: this.p2Wins },
+          { label: 'MODE', val: this.mode === 'ai' ? `AI (${this.aiDifficulty.toUpperCase()})` : '2-PLAYER' }
+        ],
+        () => this.initGame(),
+        { allowReview: true }
+      );
+    } else {
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(winner === 1 ? 4 : 3);
+      }
+    }
   }
 
   handleDraw() {
     this.gameOver = true;
-    window.audioController.playSfx(2);
     this.updateTurnLabel();
     this.render();
+
+    if (this.app && typeof this.app.showStageOverlay === 'function') {
+      this.app.showStageOverlay(
+        'MATCH DRAW',
+        'Grid filled',
+        [
+          { label: 'P1 WINS', val: this.p1Wins },
+          { label: 'P2 / AI', val: this.p2Wins },
+          { label: 'MODE', val: this.mode === 'ai' ? `AI (${this.aiDifficulty.toUpperCase()})` : '2-PLAYER' }
+        ],
+        () => this.initGame(),
+        { allowReview: true, sfx: 2 }
+      );
+    } else {
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(2);
+      }
+    }
   }
 
   destroy() {
     if (this.boundKeydown) window.removeEventListener('keydown', this.boundKeydown);
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
   }
 }
 
@@ -4372,15 +4478,30 @@ class ModTicTacToe {
       if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if (e.key === 'r' || e.key === 'R') {
         this.initGame();
-      } else {
-        const keyMap = {
-          '7': 0, '8': 1, '9': 2,
-          '4': 3, '5': 4, '6': 5,
-          '1': 6, '2': 7, '3': 8
+        return;
+      }
+
+      // Check Desktop Numpad keys via e.code
+      if (e.code && e.code.startsWith('Numpad')) {
+        const numpadMap = {
+          'Numpad7': 0, 'Numpad8': 1, 'Numpad9': 2,
+          'Numpad4': 3, 'Numpad5': 4, 'Numpad6': 5,
+          'Numpad1': 6, 'Numpad2': 7, 'Numpad3': 8
         };
-        if (keyMap[e.key] !== undefined) {
-          this.makeMove(keyMap[e.key]);
+        if (numpadMap[e.code] !== undefined) {
+          this.makeMove(numpadMap[e.code]);
+          return;
         }
+      }
+
+      // Standard top-row number keys 1-9 (1=A1, 2=B1, 3=C1, 4=A2, 5=B2, 6=C2, 7=A3, 8=B3, 9=C3)
+      const topRowMap = {
+        '1': 0, '2': 1, '3': 2,
+        '4': 3, '5': 4, '6': 5,
+        '7': 6, '8': 7, '9': 8
+      };
+      if (topRowMap[e.key] !== undefined) {
+        this.makeMove(topRowMap[e.key]);
       }
     };
     window.addEventListener('keydown', this.boundKeydown);
@@ -4414,7 +4535,7 @@ class ModTicTacToe {
     `;
 
     this.kbdEl.innerHTML = `
-      <span><kbd>NUMPAD 1-9</kbd> COORDINATE MARK</span>
+      <span><kbd>1-9</kbd> / <kbd>NUMPAD</kbd> PLACE PIECE</span>
       <span><kbd>R</kbd> RESTART</span>
       <span><kbd>?</kbd> TUTORIAL</span>
     `;
@@ -4445,6 +4566,9 @@ class ModTicTacToe {
   }
 
   initGame() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     this.board = Array(9).fill(null);
     this.xPieces = [];
     this.oPieces = [];
@@ -4452,7 +4576,9 @@ class ModTicTacToe {
     this.gameOver = false;
     this.winningLine = null;
     this.render();
-    window.audioController.playSfx(0);
+    if (window.audioController && typeof window.audioController.playSfx === 'function') {
+      window.audioController.playSfx(0);
+    }
   }
 
   render() {
@@ -5000,29 +5126,78 @@ class ModTicTacToe {
     if (winner === 'X') {
       this.xWins++;
       this.streak++;
-      window.storageManager.set('ttt_wins_x', this.xWins);
-      window.storageManager.set('ttt_streak', this.streak);
-      window.audioController.playSfx(4);
+      if (window.storageManager) {
+        window.storageManager.set('ttt_wins_x', this.xWins);
+        window.storageManager.set('ttt_streak', this.streak);
+      }
     } else {
       this.oWins++;
       this.streak = 0;
-      window.storageManager.set('ttt_wins_o', this.oWins);
-      window.storageManager.set('ttt_streak', 0);
-      window.audioController.playSfx(3);
+      if (window.storageManager) {
+        window.storageManager.set('ttt_wins_o', this.oWins);
+        window.storageManager.set('ttt_streak', 0);
+      }
     }
     this.render();
+
+    if (this.app && typeof this.app.showStageOverlay === 'function') {
+      const isPlayerWin = winner === 'X';
+      const title = isPlayerWin ? 'VICTORY' : 'DEFEAT';
+      const subtitle = isPlayerWin
+        ? (this.mode === 'pvp' ? 'Player 1 (X) won the match!' : '3-in-a-row achieved')
+        : (this.mode === 'pvp' ? 'Player 2 (O) won the match!' : 'Opponent took the line');
+      this.app.showStageOverlay(
+        title,
+        subtitle,
+        [
+          { label: 'P1 (X) WINS', val: this.xWins },
+          { label: 'O / AI WINS', val: this.oWins },
+          { label: 'STREAK', val: this.streak },
+          { label: 'MODE', val: this.mode === 'pvp' ? '2-PLAYER' : this.aiDifficulty.toUpperCase() }
+        ],
+        () => this.initGame(),
+        { allowReview: true }
+      );
+    } else {
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(winner === 'X' ? 4 : 3);
+      }
+    }
   }
 
   handleDraw() {
     this.gameOver = true;
     this.draws++;
-    window.storageManager.set('ttt_draws', this.draws);
-    window.audioController.playSfx(2);
+    if (window.storageManager) {
+      window.storageManager.set('ttt_draws', this.draws);
+    }
     this.render();
+
+    if (this.app && typeof this.app.showStageOverlay === 'function') {
+      this.app.showStageOverlay(
+        'MATCH DRAW',
+        'Grid locked',
+        [
+          { label: 'P1 (X) WINS', val: this.xWins },
+          { label: 'O / AI WINS', val: this.oWins },
+          { label: 'DRAWS', val: this.draws },
+          { label: 'STREAK', val: this.streak }
+        ],
+        () => this.initGame(),
+        { allowReview: true, sfx: 2 }
+      );
+    } else {
+      if (window.audioController && typeof window.audioController.playSfx === 'function') {
+        window.audioController.playSfx(2);
+      }
+    }
   }
 
   destroy() {
     if (this.boundKeydown) window.removeEventListener('keydown', this.boundKeydown);
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
   }
 }
 
