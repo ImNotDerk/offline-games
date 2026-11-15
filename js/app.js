@@ -3877,6 +3877,9 @@ class ModSolitaire {
   }
 
   initGame() {
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
     if (this.timerInterval) clearInterval(this.timerInterval);
     this.timer = 0;
     this.timerInterval = setInterval(() => {
@@ -4341,6 +4344,9 @@ class ModSolitaire {
   destroy() {
     if (this.timerInterval) clearInterval(this.timerInterval);
     if (this.boundKeydown) window.removeEventListener('keydown', this.boundKeydown);
+    if (this.app && typeof this.app.removeStageOverlay === 'function') {
+      this.app.removeStageOverlay();
+    }
   }
 }
 
