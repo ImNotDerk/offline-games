@@ -10,7 +10,7 @@ Designed specifically for low-specification machines and distraction-free offlin
 
 | Metric | Measurement / Implementation |
 | :--- | :--- |
-| **WASM Binary Size** | **54 KB** (`zenith_core.wasm` with LTO, `opt-level = "z"`, and symbol stripping) |
+| **WASM Binary Size** | **63 KB** (`zenith_core.wasm` with LTO, `opt-level = "z"`, and symbol stripping) |
 | **External Dependencies** | **0 crates** (Pure Rust standard library; zero third-party dependencies) |
 | **WASM Heap Allocation** | **Zero runtime heap allocations** ($O(1)$ static memory layouts) |
 | **Execution Latency** | **0.02 ms – 0.05 ms** per tick, move, and solve operation |
@@ -26,7 +26,7 @@ Designed specifically for low-specification machines and distraction-free offlin
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                          USER INTERFACE LAYER                          │
-│ 4 Retro Themes (Arcade/GB/NES/Amber) • CRT Scanlines • 3D Beveled UI   │
+│ 4 Retro Themes (Arcade/GB/NES/Amber) • Handheld Console Chassis • Cartridge Hub │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ DOM Events (Pointer / Keyboard)
                                     ▼
@@ -131,7 +131,7 @@ offline-games/
 │   ├── wordle.rs            # O(log N) binary search & duplicate letter evaluator
 │   └── dsp.rs               # 44.1kHz procedural audio DSP & SFX synthesizer
 ├── wasm/
-│   └── zenith_core.wasm     # Compiled 54 KB WebAssembly release binary
+│   └── zenith_core.wasm     # Compiled 63 KB WebAssembly release binary
 ├── js/
 │   ├── bridge.js            # Zero-copy WebAssembly memory bridge & telemetry
 │   ├── wasm_inline.js       # Base64 fallback for double-click file:// execution
